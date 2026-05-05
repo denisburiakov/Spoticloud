@@ -30,7 +30,8 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User author;
-
+    @Column(name = "track_id", nullable = false)
+    private UUID trackId;
     // К какому профилю артиста относится комментарий
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "artist_profile_id")
