@@ -1,12 +1,16 @@
 package com.spoticloud.app.controller;
 
 import com.spoticloud.app.model.Track;
+import com.spoticloud.app.service.FileService;
 import com.spoticloud.app.service.TrackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,6 +20,24 @@ import java.util.UUID;
 public class TrackController {
 
     private final TrackService trackService;
+    private final FileService fileService;
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Track> uploadTrack(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("title") String title,
+            @RequestParam("artistId") UUID artistId) throws IOException {
+
+        // 1. Сохраняем файл на диск
+        String fileName = fileService.saveFile(file);
+
+        // 2. Создаем объект трека и сохраняем в БД через сервис
+        Track track = new Track();
+        track.setTitle(title);
+        track.setArtistId(artistId);
+        track.setAudioUrl("/media/" + fileName); // Путь для фронтенда
+
+        return ResponseEntity.ok(trackService.save(track));
+    }
     @GetMapping
     public ResponseEntity<List<Track>> getAllTracks() {
         return ResponseEntity.ok(trackService.getAllTracks());

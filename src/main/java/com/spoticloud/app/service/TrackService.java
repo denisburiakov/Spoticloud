@@ -19,7 +19,9 @@ public class TrackService {
     public List<Track> getAllTracks() {
         return trackRepository.findAll();
     }
-
+    public Track save(Track track) {
+        return trackRepository.save(track);
+    }
     @Transactional(readOnly = true)
     public List<Track> getTracksByArtist(UUID artistId) {
         return trackRepository.findByArtistId(artistId);

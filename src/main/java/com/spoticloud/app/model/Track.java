@@ -30,6 +30,10 @@ public class Track {
     @Column(name = "album_id")
     private UUID albumId;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "artist_id", nullable = false)
+    private ArtistProfile artist;
+
     @Column(name = "artist_id")
     private UUID artistId;
 }
