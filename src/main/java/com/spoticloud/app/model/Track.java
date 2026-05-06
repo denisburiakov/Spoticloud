@@ -34,6 +34,4 @@ public class Track {
     @JoinColumn(name = "artist_id", nullable = false)
     private ArtistProfile artist;
 
-    @Column(name = "artist_id")
-    private UUID artistId;
 }

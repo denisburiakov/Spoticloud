@@ -1,6 +1,8 @@
 package com.spoticloud.app.controller;
 
+import com.spoticloud.app.model.ArtistProfile;
 import com.spoticloud.app.model.Track;
+import com.spoticloud.app.service.ArtistProfileService;
 import com.spoticloud.app.service.FileService;
 import com.spoticloud.app.service.TrackService;
 import lombok.RequiredArgsConstructor;
@@ -21,20 +23,22 @@ public class TrackController {
 
     private final TrackService trackService;
     private final FileService fileService;
+    private final ArtistProfileService artistProfileService;
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Track> uploadTrack(
             @RequestParam("file") MultipartFile file,
             @RequestParam("title") String title,
             @RequestParam("artistId") UUID artistId) throws IOException {
 
-        // 1. Сохраняем файл на диск
+
         String fileName = fileService.saveFile(file);
 
-        // 2. Создаем объект трека и сохраняем в БД через сервис
+        ArtistProfile profile = artistProfileService.findById(artistId);
         Track track = new Track();
+        track.setArtist(profile);
         track.setTitle(title);
-        track.setArtistId(artistId);
-        track.setAudioUrl("/media/" + fileName); // Путь для фронтенда
+        track.setArtist(profile);
+        track.setAudioUrl("/media/" + fileName);
 
         return ResponseEntity.ok(trackService.save(track));
     }
