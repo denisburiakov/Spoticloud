@@ -1,5 +1,7 @@
 package com.spoticloud.app.controller;
 
+import com.spoticloud.app.dto.TrackResponseDTO;
+import com.spoticloud.app.mapper.TrackMapper;
 import com.spoticloud.app.model.ArtistProfile;
 import com.spoticloud.app.model.Track;
 import com.spoticloud.app.service.ArtistProfileService;
@@ -15,19 +17,18 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/tracks")
 @RequiredArgsConstructor
 public class TrackController {
 
+    private final TrackMapper trackMapper;
     private final TrackService trackService;
     private final FileService fileService;
     private final ArtistProfileService artistProfileService;
-    @GetMapping
-    public ResponseEntity<List<Track>> getAllTracks() {
-        return ResponseEntity.ok(trackService.getAllTracks());
-    }
+
 
     @GetMapping("/artist/{artistId}")
     public ResponseEntity<List<Track>> getTracksByArtist(@PathVariable UUID artistId) {
@@ -64,5 +65,30 @@ public class TrackController {
             @RequestParam("artistId") UUID artistId
     ) {
         return trackService.createTrack(title, audioFile, coverFile, artistId);
+    }
+
+
+    @GetMapping
+    public ResponseEntity<List<TrackResponseDTO>> getTracks(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) UUID artistId
+    ) {
+        List<Track> tracks;
+
+        // 1. Получаем данные из сервиса
+        if (search != null) {
+            tracks = trackService.searchTracks(search);
+        } else if (artistId != null) {
+            tracks = trackService.getTracksByArtist(artistId);
+        } else {
+            tracks = trackService.getAllTracks();
+        }
+
+        // 2. Превращаем "сырые" Track в красивые TrackResponseDTO через маппер
+        List<TrackResponseDTO> response = tracks.stream()
+                .map(trackMapper::toDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 }

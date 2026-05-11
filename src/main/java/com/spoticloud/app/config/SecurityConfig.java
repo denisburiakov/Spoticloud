@@ -20,9 +20,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Отключаем для тестов в Postman
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/api/v1/auth/register").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/tracks/**").permitAll()
 
-                        .requestMatchers("/api/v1/tracks/all", "/media/**").permitAll()
+                        .requestMatchers("/media/**").permitAll()
 
                         .anyRequest().authenticated()
                 )

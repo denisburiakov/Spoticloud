@@ -29,6 +29,9 @@ public class TrackService {
     public Track save(Track track) {
         return trackRepository.save(track);
     }
+    public List<Track> searchTracks(String title) {
+        return trackRepository.findByTitleContainingIgnoreCase(title);
+    }
     @Transactional(readOnly = true)
     public List<Track> getTracksByArtist(UUID artistId) {
         return trackRepository.findByArtistId(artistId);
