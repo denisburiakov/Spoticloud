@@ -26,7 +26,6 @@ public class Track {
     @Column(name = "cover_url")
     private String coverUrl;
 
-    // Сюда просто ID-шники без лишних связей, как ты и хотел
     @Column(name = "album_id")
     private UUID albumId;
 

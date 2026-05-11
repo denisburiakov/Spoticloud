@@ -24,24 +24,6 @@ public class TrackController {
     private final TrackService trackService;
     private final FileService fileService;
     private final ArtistProfileService artistProfileService;
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Track> uploadTrack(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("title") String title,
-            @RequestParam("artistId") UUID artistId) throws IOException {
-
-
-        String fileName = fileService.saveFile(file);
-
-        ArtistProfile profile = artistProfileService.findById(artistId);
-        Track track = new Track();
-        track.setArtist(profile);
-        track.setTitle(title);
-        track.setArtist(profile);
-        track.setAudioUrl("/media/" + fileName);
-
-        return ResponseEntity.ok(trackService.save(track));
-    }
     @GetMapping
     public ResponseEntity<List<Track>> getAllTracks() {
         return ResponseEntity.ok(trackService.getAllTracks());
@@ -63,5 +45,24 @@ public class TrackController {
     public ResponseEntity<Void> deleteTrack(@PathVariable UUID id) {
         trackService.deleteTrack(id);
         return ResponseEntity.noContent().build();
+    }
+    @PatchMapping("/{trackId}/spoticloud_cover")
+    public ResponseEntity<Track> uploadCover(
+            @PathVariable UUID trackId,
+            @RequestParam("file") MultipartFile file) {
+
+        // Вызываем сервис, который сохранит картинку и обновит поле coverUrl в базе
+        Track updatedTrack = trackService.updateTrackCover(trackId, file);
+
+        return ResponseEntity.ok(updatedTrack);
+    }
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Track createTrack(
+            @RequestParam("file") MultipartFile audioFile,
+            @RequestParam("cover") MultipartFile coverFile, // Добавляем это поле
+            @RequestParam("title") String title,
+            @RequestParam("artistId") UUID artistId
+    ) {
+        return trackService.createTrack(title, audioFile, coverFile, artistId);
     }
 }
