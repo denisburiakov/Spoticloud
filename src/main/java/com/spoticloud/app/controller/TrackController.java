@@ -75,7 +75,7 @@ public class TrackController {
     ) {
         List<Track> tracks;
 
-        // 1. Получаем данные из сервиса
+
         if (search != null) {
             tracks = trackService.searchTracks(search);
         } else if (artistId != null) {
@@ -84,7 +84,7 @@ public class TrackController {
             tracks = trackService.getAllTracks();
         }
 
-        // 2. Превращаем "сырые" Track в красивые TrackResponseDTO через маппер
+
         List<TrackResponseDTO> response = tracks.stream()
                 .map(trackMapper::toDTO)
                 .collect(Collectors.toList());

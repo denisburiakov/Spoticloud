@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TrackMapper {
 
-    // Адрес твоего сервера для раздачи статики
+
     private final String BASE_URL = "http://localhost:8081";
 
     public TrackResponseDTO toDTO(Track track) {
