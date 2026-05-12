@@ -1,5 +1,6 @@
 package com.spoticloud.app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +12,8 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"tracks", "hibernateLazyInitializer", "handler"})
+
 public class Track {
 
     @Id
@@ -20,7 +23,7 @@ public class Track {
     @Column(nullable = false)
     private String title;
 
-    @Column(name = "audio_url", nullable = false)
+    @Column(name = "audio_url", nullable = false, unique = true)
     private String audioUrl;
 
     @Column(name = "cover_url")
@@ -30,7 +33,7 @@ public class Track {
     private UUID albumId;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "artist_id", nullable = false)
+    @JoinColumn(name = "artist_id", nullable = true)
     private ArtistProfile artist;
 
 }

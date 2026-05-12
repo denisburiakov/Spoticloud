@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>SpotiCloud | Student Edition</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>SpotiCloud</h1>
+        <input type="text" id="searchInput" placeholder="Поиск треков...">
+    </header>
+
+    <main id="trackList">
+        <p class="loading">Загружаем музыку...</p>
+    </main>
+</div>
+
+<div class="player-bar">
+    <div id="currentTrackTitle">Выберите трек</div>
+    <audio id="mainAudio" controls></audio>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

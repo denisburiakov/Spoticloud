@@ -1,5 +1,6 @@
 package com.spoticloud.app.config;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -11,11 +12,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 1. Подключаем музыку (допустим, она в папке music)
         registry.addResourceHandler("/media/tracks/**")
                 .addResourceLocations("file:///C:/spcl_uploads/spoticloud_media/");
 
         registry.addResourceHandler("/media/covers/**")
                 .addResourceLocations("file:///C:/spcl_uploads/spoticloud_covers/");
     }
+
 }

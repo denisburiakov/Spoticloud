@@ -10,5 +10,5 @@ import java.util.UUID;
 public interface TrackRepository extends JpaRepository<Track, UUID> {
     List<Track> findByArtistId(UUID artist_id);
     List<Track> findByTitleContainingIgnoreCase(String title);
-
+    boolean existsByAudioUrl(String audioUrl);
 }
