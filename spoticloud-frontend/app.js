@@ -17,6 +17,41 @@ async function fetchTracks(query = '') {
         trackList.innerHTML = `<p class="error">Ошибка: проверь, запущен ли бэкенд!</p>`;
     }
 }
+async function uploadFile() {
+    const titleInput = document.getElementById('trackTitle');
+    const fileInput = document.getElementById('trackFile');
+    const status = document.getElementById('uploadStatus');
+
+    if (!fileInput.files[0] || !titleInput.value) {
+        alert("Заполни название и выбери файл!");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("title", titleInput.value);
+    formData.append("file", fileInput.files[0]);
+
+    status.innerText = "Загрузка...";
+
+    try {
+        const response = await fetch('http://localhost:8081/api/v1/tracks/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            status.innerText = "Успешно загружено!";
+            titleInput.value = '';
+            fileInput.value = '';
+            fetchTracks(); // Обновляем список треков на странице
+        } else {
+            status.innerText = "Ошибка при загрузке.";
+        }
+    } catch (error) {
+        console.error("Ошибка:", error);
+        status.innerText = "Бэкенд не ответил.";
+    }
+}
 
 function renderTracks(tracks) {
     trackList.innerHTML = '';

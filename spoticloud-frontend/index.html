@@ -6,6 +6,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="upload-section" style="margin-bottom: 30px; padding: 20px; border: 1px solid #ccc;">
+    <h3>Загрузить новый трек</h3>
+    <input type="text" id="trackTitle" placeholder="Название трека">
+    <input type="file" id="trackFile" accept=".mp3">
+    <button onclick="uploadFile()">Загрузить</button>
+    <p id="uploadStatus"></p>
+</div>
 <div class="container">
     <header>
         <h1>SpotiCloud</h1>
