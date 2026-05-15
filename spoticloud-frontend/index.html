@@ -6,13 +6,17 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="upload-section" style="margin-bottom: 30px; padding: 20px; border: 1px solid #ccc;">
-    <h3>Загрузить новый трек</h3>
-    <input type="text" id="trackTitle" placeholder="Название трека">
-    <input type="file" id="trackFile" accept=".mp3">
+<div class="upload-section">
+    <label>Музыка: <input type="file" id="trackFile" accept=".mp3"></label>
+    <label>Обложка: <input type="file" id="coverFile" accept="image/*"></label>
     <button onclick="uploadFile()">Загрузить</button>
-    <p id="uploadStatus"></p>
+    <p style="font-size: 0.8em; color: #ccc; margin-top: 5px;">
+        * Файл должен быть в формате: <strong>Артист - Название.mp3</strong>
+    </p>
 </div>
+
+<button id="backBtn" style="display: none; margin-bottom: 20px;" onclick="location.reload()">← Назад ко всем трекам</button>
+
 <div class="container">
     <header>
         <h1>SpotiCloud</h1>

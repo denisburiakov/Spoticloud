@@ -7,6 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -25,6 +28,10 @@ public class ArtistProfile {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    private String social_links;
+
     @Column(nullable = false, unique = true)
     private String name;
 
@@ -41,10 +48,6 @@ public class ArtistProfile {
 
     @Column(name = "is_verified")
     private boolean verified = false;
-
-    // Храним метаданные в JSONB, так как это PostgreSQL 18
-    @Column(columnDefinition = "jsonb")
-    private String socialLinks;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

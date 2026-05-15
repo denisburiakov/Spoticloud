@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface ArtistProfileRepository extends JpaRepository<ArtistProfile, UUID> {
+    Optional<ArtistProfile> findByName(String name);
 }

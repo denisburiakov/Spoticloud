@@ -32,7 +32,13 @@ public class User implements UserDetails { // Добавили интерфей�
     @Column(nullable = false)
     private String password;
 
-    // --- Методы UserDetails (необходимы для Security) ---
+    @Enumerated(EnumType.STRING) // Это ВАЖНО: сохранит в БД текст, а не индекс
+    private UserRole role;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private ArtistProfile artistProfile;
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

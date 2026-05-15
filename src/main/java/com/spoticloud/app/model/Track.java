@@ -33,7 +33,7 @@ public class Track {
     private UUID albumId;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "artist_id", nullable = true)
+    @JoinColumn(name = "artist_id")
     private ArtistProfile artist;
 
 }

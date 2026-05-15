@@ -4,7 +4,6 @@ import com.spoticloud.app.dto.TrackResponseDTO;
 import com.spoticloud.app.mapper.TrackMapper;
 import com.spoticloud.app.model.Track;
 import com.spoticloud.app.service.ArtistProfileService;
-import com.spoticloud.app.service.FileService;
 import com.spoticloud.app.service.TrackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +24,6 @@ public class TrackController {
 
     private final TrackMapper trackMapper;
     private final TrackService trackService;
-    private final FileService fileService;
     private final ArtistProfileService artistProfileService;
 
     @GetMapping("/artist/{artistId}")
