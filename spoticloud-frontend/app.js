@@ -22,6 +22,8 @@ const translations = {
         placeholderEmail: "Email",
         placeholderArtistName: "Твоё сценическое имя",
         placeholderPassword: "Пароль",
+        sidebarTitle: "Профиль",
+        btnLogout: "Выйти из аккаунта",
 
         // Главная страница
         mainHeader: "Главная",
@@ -78,6 +80,8 @@ const translations = {
         btnToConsole: "Artist Console",
         statusLoading: "Loading music...",
         statusSilence: "It's quiet here for now...",
+        sidebarTitle: "Profile",
+        btnLogout: "Log Out",
 
         // Консоль артиста
         btnBack: "← Back",
@@ -112,11 +116,11 @@ const translations = {
     }
 };
 
-// Функция переключения языка (с сохранением в память браузере)
+// Функция переключения языка (с сохранением в памяти браузере)
 function changeLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('lang', lang); // Жестко запоминаем выбор
-    langSelect.value = lang; // Синхронизируем выпадашку visual-часть
+    if (langSelect) langSelect.value = lang; // Синхронизируем выпадашку visual-часть
 
     const dict = translations[lang];
 
@@ -181,7 +185,13 @@ async function handleAuthSubmit() {
             if (response.ok) {
                 const data = await response.json();
                 localStorage.setItem('username', data.username);
-                const role = data.role ? data.role.toString().toUpperCase() : "";
+
+                const role = data.role ? data.role.toString().toUpperCase() : "USER";
+                localStorage.setItem('role', role); // сохраняем роль
+
+                // Заполняем инфу в сайдбаре
+                document.getElementById('sidebarUsername').innerText = data.username;
+                document.getElementById('sidebarRole').innerText = role.includes('ARTIST') ? 'Artist' : 'User';
 
                 if (role.includes('ARTIST')) {
                     document.getElementById('toArtistConsole').style.display = 'block';
@@ -251,9 +261,12 @@ function showView(viewId) {
     document.getElementById(viewId).style.display = 'block';
 
     const playerBar = document.getElementById('player-bar');
-    playerBar.style.display = (viewId === 'auth-page') ? 'none' : 'flex';
+    if (playerBar) {
+        playerBar.style.display = (viewId === 'auth-page') ? 'none' : 'flex';
+    }
 }
 
+// Переключение видимости поля с именем артиста при регистрации
 function toggleArtistInput() {
     const isArtist = document.getElementById('isArtistCheck').checked;
     document.getElementById('artistNameField').style.display = isArtist ? 'block' : 'none';
@@ -469,7 +482,33 @@ async function uploadFile() {
 }
 
 // Поиск по инпуту
-searchInput.addEventListener('input', (e) => fetchTracks(e.target.value));
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => fetchTracks(e.target.value));
+}
+
+// Открытие / закрытие сайдбара
+function toggleSidebar(open) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    if (sidebar && overlay) {
+        if (open) {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+        } else {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+    }
+}
+
+// Логаут
+function handleLogout() {
+    localStorage.removeItem('username');
+    localStorage.removeItem('role');
+    toggleSidebar(false);
+    showView('auth-page');
+}
 
 // Вызывается при запуске приложения
 window.onload = () => {

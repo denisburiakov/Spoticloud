@@ -167,3 +167,119 @@ audio {
     width: 40%;
     filter: invert(1); /* Чтобы стандартный плеер был белым */
 }
+/* Боковая панель */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -300px; /* Изначально спрятана слева */
+    width: 300px;
+    height: 100%;
+    background-color: #121212;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    transition: left 0.3s ease;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Когда панель открыта */
+.sidebar.active {
+    left: 0;
+}
+
+/* Кнопка закрытия */
+.btn-close-sidebar {
+    background: none;
+    border: none;
+    color: #b3b3b3;
+    font-size: 28px;
+    cursor: pointer;
+}
+.btn-close-sidebar:hover {
+    color: #fff;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+}
+
+/* Карточка юзера */
+.user-profile-card {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.avatar-placeholder {
+    font-size: 50px;
+    background: #282828;
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 15px auto;
+}
+
+.user-profile-card h2 {
+    color: #fff;
+    margin: 0 0 5px 0;
+    font-size: 20px;
+}
+
+.role-badge {
+    color: #1db954;
+    background: rgba(29, 185, 84, 0.1);
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: inline-block;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* Кнопки в сайдбаре */
+.btn-sidebar-action {
+    width: 100%;
+    background: #282828;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: left;
+    margin-bottom: 10px;
+    transition: background 0.2s;
+}
+
+.btn-sidebar-action:hover {
+    background: #333;
+}
+
+.logout-btn {
+    color: #e91429;
+    background: transparent;
+}
+.logout-btn:hover {
+    background: rgba(233, 20, 41, 0.1);
+}
+
+/* Затемнение заднего фона */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9998;
+    display: none;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}

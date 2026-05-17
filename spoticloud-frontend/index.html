@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
+<div class="container" style="position: relative;">
 
     <div class="global-lang-selector" style="position: absolute; top: 15px; right: 15px; z-index: 9999;">
         <select id="langSelect" onchange="changeLanguage(this.value)" style="background: #282828; color: #fff; border: 1px solid #404040; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; outline: none;">
@@ -15,6 +15,27 @@
             <option value="en">🇺🇸 EN</option>
         </select>
     </div>
+
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3 data-translate="sidebarTitle">Профиль</h3>
+            <button onclick="toggleSidebar(false)" class="btn-close-sidebar">×</button>
+        </div>
+        <div class="sidebar-content">
+            <div class="user-profile-card">
+                <div class="avatar-placeholder">👤</div>
+                <h2 id="sidebarUsername">Username</h2>
+                <p id="sidebarRole" class="role-badge">User</p>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+
+            <button id="toArtistConsole" class="btn-sidebar-action" style="display:none;" onclick="showView('artist-page'); toggleSidebar(false);" data-translate="btnToConsole">Для артистов</button>
+
+            <button onclick="handleLogout()" class="btn-sidebar-action logout-btn" data-translate="btnLogout">Выйти из аккаунта</button>
+        </div>
+    </div>
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar(false)"></div>
 
     <section id="auth-page" class="view">
         <div class="auth-box" style="padding-top: 50px;">
@@ -48,10 +69,12 @@
 
     <section id="main-page" class="view" style="display:none;">
         <header class="main-header">
-            <h1 data-translate="mainHeader">Главная</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button onclick="toggleSidebar(true)" style="background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; padding: 0; line-height: 1;">☰</button>
+                <h1 data-translate="mainHeader">Главная</h1>
+            </div>
             <div class="header-actions">
                 <input type="text" id="searchInput" placeholder="Поиск любимых треков..." data-placeholder="placeholderSearch">
-                <button id="toArtistConsole" class="btn-outline" style="display:none;" onclick="showView('artist-page')" data-translate="btnToConsole">Для артистов</button>
             </div>
         </header>
 
