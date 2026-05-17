@@ -1,3 +1,4 @@
+/*
 package com.spoticloud.app.controller;
 
 import com.spoticloud.app.model.ArtistProfile;
@@ -51,7 +52,6 @@ public class TrackUploadController {
                     .orElseGet(() -> {
                         ArtistProfile newProfile = ArtistProfile.builder()
                                 .name(artistName)
-                                .userId(UUID.randomUUID())
                                 .verified(false)
                                 .build();
                         return artistProfileRepository.save(newProfile);
@@ -83,4 +83,4 @@ public class TrackUploadController {
             return ResponseEntity.status(500).body("Ошибка сервера: " + e.getMessage());
         }
     }
-}
+}*/

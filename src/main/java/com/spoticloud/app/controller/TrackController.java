@@ -1,13 +1,15 @@
 package com.spoticloud.app.controller;
 
 import com.spoticloud.app.dto.TrackResponseDTO;
-import com.spoticloud.app.mapper.TrackMapper;
+import com.spoticloud.app.model.ArtistProfile;
 import com.spoticloud.app.model.Track;
-import com.spoticloud.app.service.ArtistProfileService;
+import com.spoticloud.app.model.User;
+import com.spoticloud.app.model.UserRole;
+import com.spoticloud.app.repository.ArtistProfileRepository;
+import com.spoticloud.app.repository.TrackRepository;
+import com.spoticloud.app.repository.UserRepository;
 import com.spoticloud.app.service.TrackService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,52 +18,53 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-
 @RestController
 @RequestMapping("/api/v1/tracks")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class TrackController {
 
-    private final TrackMapper trackMapper;
     private final TrackService trackService;
-    private final ArtistProfileService artistProfileService;
+    private final TrackRepository trackRepository;
+    private final ArtistProfileRepository artistProfileRepository;
+    private final UserRepository userRepository;
 
-    @GetMapping("/artist/{artistId}")
-    public ResponseEntity<List<Track>> getTracksByArtist(@PathVariable UUID artistId) {
-        List<Track> tracks = trackService.getTracksByArtist(artistId);
-        return ResponseEntity.ok(tracks);
-    }
-
-    // ВАРИАНТ 1: Оставляем для JSON запросов (если нужно)
-    @PostMapping("/simple")
-    public ResponseEntity<Track> createTrackSimple(@RequestBody Track track) {
-        Track savedTrack = trackService.createTrack(track);
-        return new ResponseEntity<>(savedTrack, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTrack(@PathVariable UUID id) {
-        trackService.deleteTrack(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("/{trackId}/spoticloud_cover")
-    public ResponseEntity<Track> uploadCover(
-            @PathVariable UUID trackId,
-            @RequestParam("file") MultipartFile file) {
-        Track updatedTrack = trackService.updateTrackCover(trackId, file);
-        return ResponseEntity.ok(updatedTrack);
-    }
-
-
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Track uploadTrackWithFiles(
-            @RequestParam("file") MultipartFile audioFile,
-            @RequestParam("cover") MultipartFile coverFile,
-            @RequestParam("title") String title,
-            @RequestParam("artistId") UUID artistId
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadTrack(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "cover", required = false) MultipartFile cover,
+            @RequestParam("username") String username
     ) {
-        return trackService.createTrack(title, audioFile, coverFile, artistId);
+        try {
+            // 1. Ищем юзера
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("Юзер не найден"));
+
+            // 2. Проверка на артиста
+            if (user.getRole() != UserRole.ROLE_ARTIST) {
+                return ResponseEntity.status(403).body("Ты не артист, бро!");
+            }
+
+            // 3. Ищем профиль артиста этого юзера
+            ArtistProfile artistProfile = artistProfileRepository.findByUser(user)
+                    .orElseThrow(() -> new RuntimeException("Сначала создай профиль артиста!"));
+
+            // 4. Отрезаем расширение файла (.mp3, .wav), чтобы в названии трека была только красота
+            String originalFilename = file.getOriginalFilename();
+            String title = originalFilename;
+            if (originalFilename != null && originalFilename.contains(".")) {
+                title = originalFilename.substring(0, originalFilename.lastIndexOf("."));
+            }
+
+            // 5. Передаем чистое название в сервис для сохранения в базу
+            Track savedTrack = trackService.createTrack(title, file, cover, artistProfile.getId());
+
+            return ResponseEntity.ok("Трек '" + title + "' успешно загружен артистом: " + artistProfile.getName());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Ошибка загрузки: " + e.getMessage());
+        }
     }
 
     @GetMapping
@@ -71,7 +74,7 @@ public class TrackController {
     ) {
         try {
             List<Track> tracks;
-            if (search != null) {
+            if (search != null && !search.isBlank()) {
                 tracks = trackService.searchTracks(search);
             } else if (artistId != null) {
                 tracks = trackService.getTracksByArtist(artistId);
@@ -79,25 +82,38 @@ public class TrackController {
                 tracks = trackService.getAllTracks();
             }
 
-            // Если даже тут падает, значит проблема в trackService.getAllTracks()
             if (tracks == null) return ResponseEntity.ok(new java.util.ArrayList<>());
 
+            // Превращаем в DTO и добавляем artistId для будущих переходов на фронте
             List<TrackResponseDTO> response = tracks.stream()
                     .map(t -> {
                         TrackResponseDTO dto = new TrackResponseDTO();
                         dto.setId(t.getId());
-                        dto.setTitle(t.getTitle() != null ? t.getTitle() : "Unknown");
+                        dto.setTitle(t.getTitle());
                         dto.setAudioUrl(t.getAudioUrl());
                         dto.setCoverUrl(t.getCoverUrl());
-                        // Заглушка для ID артиста, чтобы не лезть в связи
-                        dto.setArtistId(null);
+
+                        if (t.getArtist() != null) {
+                            dto.setArtistName(t.getArtist().getName());
+                            dto.setArtistId(t.getArtist().getId()); // Передаем ID для генерации ссылок на фронте
+                        } else {
+                            dto.setArtistName("Unknown");
+                            dto.setArtistId(null);
+                        }
                         return dto;
                     })
                     .collect(Collectors.toList());
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            e.printStackTrace(); // Это ВАЖНО: выведет ошибку в консоль IDEA
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка на бэке: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Ошибка при получении треков");
         }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTrack(@PathVariable UUID id) {
+        trackService.deleteTrack(id);
+        return ResponseEntity.noContent().build();
     }
 }

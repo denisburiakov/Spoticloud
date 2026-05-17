@@ -25,9 +25,10 @@ public class ArtistProfile {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column(name = "user_id", nullable = false)
-    private UUID userId;
 
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @JdbcTypeCode(SqlTypes.JSON)
     private String social_links;

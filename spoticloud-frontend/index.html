@@ -2,36 +2,94 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpotiCloud | Student Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="upload-section">
-    <label>Музыка: <input type="file" id="trackFile" accept=".mp3"></label>
-    <label>Обложка: <input type="file" id="coverFile" accept="image/*"></label>
-    <button onclick="uploadFile()">Загрузить</button>
-    <p style="font-size: 0.8em; color: #ccc; margin-top: 5px;">
-        * Файл должен быть в формате: <strong>Артист - Название.mp3</strong>
-    </p>
-</div>
-
-<button id="backBtn" style="display: none; margin-bottom: 20px;" onclick="location.reload()">← Назад ко всем трекам</button>
-
 <div class="container">
-    <header>
-        <h1>SpotiCloud</h1>
-        <input type="text" id="searchInput" placeholder="Поиск треков...">
-    </header>
+    <section id="auth-page" class="view">
+        <div class="auth-box">
+            <h1 class="logo-text">SpotiCloud</h1>
 
-    <main id="trackList">
-        <p class="loading">Загружаем музыку...</p>
-    </main>
+            <div class="auth-tabs">
+                <span id="tab-login" onclick="switchAuthMode('login')">Вход</span>
+                <span id="tab-register" class="active" onclick="switchAuthMode('register')">Регистрация</span>
+            </div>
+
+            <div class="form-group">
+                <input type="text" id="authUsername" placeholder="Логин (Username)">
+
+                <div id="register-only-fields">
+                    <input type="email" id="authEmail" placeholder="Email">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="isArtistCheck" onchange="toggleArtistInput()">
+                        <span>Я артист</span>
+                    </label>
+                    <div id="artistNameField" style="display: none;">
+                        <input type="text" id="authArtistName" placeholder="Твоё сценическое имя">
+                    </div>
+                </div>
+
+                <input type="password" id="authPassword" placeholder="Пароль">
+
+                <button id="authBtn" onclick="handleAuthSubmit()" class="btn-main">Зарегистрироваться</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="main-page" class="view" style="display:none;">
+        <header class="main-header">
+            <h1>Главная</h1>
+            <div class="header-actions">
+                <input type="text" id="searchInput" placeholder="Поиск любимых треков...">
+                <button id="toArtistConsole" class="btn-outline" style="display:none;" onclick="showView('artist-page')">Для артистов</button>
+            </div>
+        </header>
+
+        <div id="trackList" class="track-grid">
+            <p class="status-msg">Загрузка музыки...</p>
+        </div>
+    </section>
+
+    <section id="artist-page" class="view" style="display:none;">
+        <header class="sub-header">
+            <button onclick="showView('main-page')" class="btn-back">← Назад</button>
+            <h2>Консоль артиста</h2>
+        </header>
+
+        <div class="upload-container">
+            <h3>Добавить новый сингл</h3>
+            <div class="upload-form">
+                <div class="file-input">
+                    <label>Файл трека (.mp3):</label>
+                    <input type="file" id="trackFile" accept=".mp3">
+                </div>
+                <div class="file-input">
+                    <label>Обложка (image):</label>
+                    <input type="file" id="coverFile" accept="image/*">
+                </div>
+                <button onclick="uploadFile()" class="btn-main">Опубликовать в SpotiCloud</button>
+            </div>
+            <p class="hint">* Формат названия файла: <strong>Артист - Название.mp3</strong></p>
+        </div>
+    </section>
+
+    <section id="artist-profile-page" class="view" style="display:none;">
+    </section>
 </div>
 
-<div class="player-bar">
-    <div id="currentTrackTitle">Выберите трек</div>
+<footer id="player-bar" class="player-bar" style="display:none;">
+    <div class="player-info">
+        <img id="playerCover" src="https://via.placeholder.com/150" alt="Cover">
+        <div>
+            <div id="currentTrackTitle" style="font-weight:bold;">Выберите трек</div>
+            <div id="currentTrackArtist" style="font-size: 0.8rem; color: #b3b3b3;">Исполнитель</div>
+        </div>
+    </div>
     <audio id="mainAudio" controls></audio>
-</div>
+    <div style="width: 30%;"></div>
+</footer>
 
 <script src="app.js"></script>
 </body>

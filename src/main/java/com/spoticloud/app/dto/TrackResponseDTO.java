@@ -16,4 +16,6 @@ public class TrackResponseDTO {
     private UUID artistId;
     private String audioUrl; // Было audioPath
     private String coverUrl; // Было coverPath
+
+    private String artistName;
 }
