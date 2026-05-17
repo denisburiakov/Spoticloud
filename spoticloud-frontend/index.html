@@ -8,70 +8,78 @@
 </head>
 <body>
 <div class="container">
+
+    <div class="global-lang-selector" style="position: absolute; top: 15px; right: 15px; z-index: 9999;">
+        <select id="langSelect" onchange="changeLanguage(this.value)" style="background: #282828; color: #fff; border: 1px solid #404040; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; outline: none;">
+            <option value="ru">🇷🇺 RU</option>
+            <option value="en">🇺🇸 EN</option>
+        </select>
+    </div>
+
     <section id="auth-page" class="view">
-        <div class="auth-box">
+        <div class="auth-box" style="padding-top: 50px;">
             <h1 class="logo-text">SpotiCloud</h1>
 
             <div class="auth-tabs">
-                <span id="tab-login" onclick="switchAuthMode('login')">Вход</span>
-                <span id="tab-register" class="active" onclick="switchAuthMode('register')">Регистрация</span>
+                <span id="tab-login" onclick="switchAuthMode('login')" data-translate="tabLogin">Вход</span>
+                <span id="tab-register" class="active" onclick="switchAuthMode('register')" data-translate="tabRegister">Регистрация</span>
             </div>
 
             <div class="form-group">
-                <input type="text" id="authUsername" placeholder="Логин (Username)">
+                <input type="text" id="authUsername" placeholder="Логин (Username)" data-placeholder="placeholderUsername">
 
                 <div id="register-only-fields">
-                    <input type="email" id="authEmail" placeholder="Email">
+                    <input type="email" id="authEmail" placeholder="Email" data-placeholder="placeholderEmail">
                     <label class="checkbox-container">
                         <input type="checkbox" id="isArtistCheck" onchange="toggleArtistInput()">
-                        <span>Я артист</span>
+                        <span data-translate="labelArtist">Я артист</span>
                     </label>
                     <div id="artistNameField" style="display: none;">
-                        <input type="text" id="authArtistName" placeholder="Твоё сценическое имя">
+                        <input type="text" id="authArtistName" placeholder="Твоё сценическое имя" data-placeholder="placeholderArtistName">
                     </div>
                 </div>
 
-                <input type="password" id="authPassword" placeholder="Пароль">
+                <input type="password" id="authPassword" placeholder="Пароль" data-placeholder="placeholderPassword">
 
-                <button id="authBtn" onclick="handleAuthSubmit()" class="btn-main">Зарегистрироваться</button>
+                <button id="authBtn" onclick="handleAuthSubmit()" class="btn-main" data-translate="btnRegister">Зарегистрироваться</button>
             </div>
         </div>
     </section>
 
     <section id="main-page" class="view" style="display:none;">
         <header class="main-header">
-            <h1>Главная</h1>
+            <h1 data-translate="mainHeader">Главная</h1>
             <div class="header-actions">
-                <input type="text" id="searchInput" placeholder="Поиск любимых треков...">
-                <button id="toArtistConsole" class="btn-outline" style="display:none;" onclick="showView('artist-page')">Для артистов</button>
+                <input type="text" id="searchInput" placeholder="Поиск любимых треков..." data-placeholder="placeholderSearch">
+                <button id="toArtistConsole" class="btn-outline" style="display:none;" onclick="showView('artist-page')" data-translate="btnToConsole">Для артистов</button>
             </div>
         </header>
 
         <div id="trackList" class="track-grid">
-            <p class="status-msg">Загрузка музыки...</p>
+            <p class="status-msg" data-translate="statusLoading">Загрузка музыки...</p>
         </div>
     </section>
 
     <section id="artist-page" class="view" style="display:none;">
         <header class="sub-header">
-            <button onclick="showView('main-page')" class="btn-back">← Назад</button>
-            <h2>Консоль артиста</h2>
+            <button onclick="showView('main-page')" class="btn-back" data-translate="btnBack">← Назад</button>
+            <h2 data-translate="consoleHeader">Консоль артиста</h2>
         </header>
 
         <div class="upload-container">
-            <h3>Добавить новый сингл</h3>
+            <h3 data-translate="uploadTitle">Добавить новый сингл</h3>
             <div class="upload-form">
                 <div class="file-input">
-                    <label>Файл трека (.mp3):</label>
+                    <label data-translate="labelTrackFile">Файл трека (.mp3):</label>
                     <input type="file" id="trackFile" accept=".mp3">
                 </div>
                 <div class="file-input">
-                    <label>Обложка (image):</label>
+                    <label data-translate="labelCoverFile">Обложка (image):</label>
                     <input type="file" id="coverFile" accept="image/*">
                 </div>
-                <button onclick="uploadFile()" class="btn-main">Опубликовать в SpotiCloud</button>
+                <button onclick="uploadFile()" class="btn-main" data-translate="btnPublish">Опубликовать в SpotiCloud</button>
             </div>
-            <p class="hint">* Формат названия файла: <strong>Артист - Название.mp3</strong></p>
+            <p class="hint" data-translate="hintFormat">* Формат названия файла: Артист - Название.mp3</p>
         </div>
     </section>
 
@@ -83,8 +91,8 @@
     <div class="player-info">
         <img id="playerCover" src="https://via.placeholder.com/150" alt="Cover">
         <div>
-            <div id="currentTrackTitle" style="font-weight:bold;">Выберите трек</div>
-            <div id="currentTrackArtist" style="font-size: 0.8rem; color: #b3b3b3;">Исполнитель</div>
+            <div id="currentTrackTitle" style="font-weight:bold;" data-translate="playerDefaultTitle">Выберите трек</div>
+            <div id="currentTrackArtist" style="font-size: 0.8rem; color: #b3b3b3;" data-translate="playerDefaultArtist">Исполнитель</div>
         </div>
     </div>
     <audio id="mainAudio" controls></audio>
