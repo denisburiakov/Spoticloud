@@ -11,4 +11,7 @@ import java.util.UUID;
 public interface ArtistProfileRepository extends JpaRepository<ArtistProfile, UUID> {
     Optional<ArtistProfile> findByName(String name);
     Optional<ArtistProfile> findByUser(User user);
+
+
+    Optional<ArtistProfile> findByUserUsername(String username);
 }

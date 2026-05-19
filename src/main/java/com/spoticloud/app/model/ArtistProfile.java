@@ -10,7 +10,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -27,23 +26,28 @@ public class ArtistProfile {
     private UUID id;
 
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true) // unique=true гарантирует, что у одного юзера только ОДИН профиль
     private User user;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    private String social_links;
-
-    @Column(nullable = false, unique = true)
-    private String name;
+    @Column(nullable = false)
+    private String name; // Сценическое имя (заполняется при регистрации или редактировании)
 
     @Column(columnDefinition = "TEXT")
     private String bio;
 
+    // НОВОЕ ПОЛЕ: Ежемесячные слушатели (то, что просил фронтенд)
+    @Column(name = "monthly_listeners")
+    private Integer monthlyListeners = 0;
+
     @Column(name = "profile_picture_url")
-    private String profilePictureUrl;
+    private String profilePictureUrl; // Твой аватар на фронте
 
     @Column(name = "header_image_url")
-    private String headerImageUrl;
+    private String headerImageUrl; // Твой баннер (задний фон) на фронте
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "social_links")
+    private String socialLinks; // Привели к camelCase для код-стайла Java
 
     private String country;
 

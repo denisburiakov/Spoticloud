@@ -31,6 +31,7 @@
             <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
 
             <button id="toArtistConsole" class="btn-sidebar-action" style="display:none;" onclick="showView('artist-page'); toggleSidebar(false);" data-translate="btnToConsole">Для артистов</button>
+            <button id="toArtistProfile" class="btn-sidebar-action" style="display:none;" onclick="showView('artist-profile-page'); toggleSidebar(false);">Мой профиль артиста</button>
 
             <button onclick="handleLogout()" class="btn-sidebar-action logout-btn" data-translate="btnLogout">Выйти из аккаунта</button>
         </div>
@@ -51,16 +52,26 @@
 
                 <div id="register-only-fields">
                     <input type="email" id="authEmail" placeholder="Email" data-placeholder="placeholderEmail">
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="isArtistCheck" onchange="toggleArtistInput()">
-                        <span data-translate="labelArtist">Я артист</span>
-                    </label>
+
+                    <div class="toggle-container" style="display: flex; align-items: center; justify-content: space-between; margin: 15px 0 15px; padding: 0 5px;">
+                        <span data-translate="labelArtist" style="color: #b3b3b3; font-size: 14px; font-weight: 500;">Я артист</span>
+                        <label class="switch" style="position: relative; display: inline-block; width: 46px; height: 24px; margin: 0;">
+                            <input type="checkbox" id="isArtistCheck" onchange="toggleArtistInput()" style="opacity: 0; width: 0; height: 0;">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
                     <div id="artistNameField" style="display: none;">
                         <input type="text" id="authArtistName" placeholder="Твоё сценическое имя" data-placeholder="placeholderArtistName">
                     </div>
                 </div>
 
-                <input type="password" id="authPassword" placeholder="Пароль" data-placeholder="placeholderPassword">
+                <div class="password-wrapper" style="position: relative; width: 100%;">
+                    <input type="password" id="authPassword" placeholder="Пароль" data-placeholder="placeholderPassword" style="width: 100%; padding-right: 40px; box-sizing: border-box;">
+                    <button type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; width: 20px; height: 20px; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10;">
+                        <svg id="eyeIcon" viewBox="0 0 24 24" width="20" height="20" stroke="#888" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
 
                 <button id="authBtn" onclick="handleAuthSubmit()" class="btn-main" data-translate="btnRegister">Зарегистрироваться</button>
             </div>
@@ -84,9 +95,9 @@
     </section>
 
     <section id="artist-page" class="view" style="display:none;">
-        <header class="sub-header">
-            <button onclick="showView('main-page')" class="btn-back" data-translate="btnBack">← Назад</button>
-            <h2 data-translate="consoleHeader">Консоль артиста</h2>
+        <header class="sub-header" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+            <button onclick="showView('main-page')" class="btn-back-custom" data-translate="btnBack">← Назад</button>
+            <h2 data-translate="consoleHeader" style="margin: 0;">Консоль артиста</h2>
         </header>
 
         <div class="upload-container">
@@ -106,7 +117,64 @@
         </div>
     </section>
 
+    <section id="artist-public-page" class="view" style="display:none;"></section>
+
     <section id="artist-profile-page" class="view" style="display:none;">
+        <header class="sub-header" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+            <button onclick="showView('main-page')" class="btn-back-custom" data-translate="btnBack">← Назад</button>
+            <h2 data-translate="artistProfileTitle" style="margin: 0;">Профиль артиста</h2>
+        </header>
+
+        <div id="artist-profile-warning" class="profile-warning" style="display: none;">
+            Заполните карточку артиста!
+        </div>
+
+        <div id="artist-profile-success" class="profile-success" style="display: none; background: #1db954; color: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-weight: 600;">
+            Карточка артиста успешно обновлена и сохранена.
+        </div>
+
+        <div id="artist-profile-display" class="artist-card-hero" style="display: none; position: relative; border-radius: 12px; overflow: hidden; background: #282828; min-height: 280px; flex-direction: column; justify-content: flex-end;">
+            <div class="artist-hero-bg" id="artistHeroBg" style="position: absolute; top:0; left:0; width:100%; height:100%; background-size: cover; background-position: center; z-index: 1; filter: brightness(0.6);"></div>
+
+            <div class="artist-hero-content" style="position: relative; z-index: 2; padding: 30px; display: flex; align-items: center; gap: 25px; flex-wrap: wrap;">
+                <div class="artist-avatar-container" style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); background: #181818;">
+                    <img id="artistDisplayAvatar" src="https://via.placeholder.com/150" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div class="artist-hero-text" style="flex: 1; color: white;">
+                    <span class="verified-badge" style="background: #007eed; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; margin-bottom: 8px;">✓ Подтвержденный артист</span>
+                    <h1 id="artistDisplayName" style="font-size: 42px; margin: 0 0 10px 0; font-weight: 800;">Имя Артиста</h1>
+                    <p class="listeners-count" style="margin: 0 0 10px 0; font-size: 16px; color: #e0e0e0; font-weight: 600;"><span id="artistDisplayListeners">0</span> слушателей за месяц</p>
+                    <p id="artistDisplayBio" class="artist-bio-text" style="margin: 0; color: #b3b3b3; max-width: 600px; line-height: 1.5; font-size: 14px;">Здесь будет твое описание...</p>
+                    <button onclick="openArtistEditor()" class="btn-outline" style="margin-top: 15px; padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 20px; border: 1px solid #b3b3b3; background: transparent; color: white; cursor: pointer; transition: all 0.2s;">Редактировать профиль</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="artist-profile-form" class="upload-container" style="margin-top: 20px; display: none;">
+            <h3 id="formActionTitle">Заполнить карточку артиста</h3>
+            <div class="upload-form">
+                <div class="file-input">
+                    <label>Фотокарточка артиста (Аватар):</label>
+                    <input type="file" id="artistAvatarFile" accept="image/*">
+                </div>
+                <div class="file-input">
+                    <label>Баннер профиля (Задний фон):</label>
+                    <input type="file" id="artistBgFile" accept="image/*">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display:block; margin-bottom: 5px; color: #b3b3b3; font-size: 14px;">Количество ежемесячных слушателей:</label>
+                    <input type="number" id="artistListenersInput" placeholder="Например: 145000" min="0">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display:block; margin-bottom: 5px; color: #b3b3b3; font-size: 14px;">Описание артиста (Биография):</label>
+                    <textarea id="artistBioInput" rows="4" placeholder="Расскажи свою историю, добавь ссылки на соцсети..." style="width:100%; background:#2a2a2a; border:1px solid transparent; border-radius:8px; color:white; padding:12px; box-sizing:border-box; font-family:inherit; resize:vertical; outline: none;"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="saveArtistProfile()" class="btn-main" style="width: auto; padding: 12px 24px;">Сохранить профиль</button>
+                    <button id="cancelArtistEditBtn" onclick="closeArtistEditor()" class="btn-outline" style="display: none; padding: 12px 24px; border-radius: 24px;">Отмена</button>
+                </div>
+            </div>
+        </div>
     </section>
 </div>
 

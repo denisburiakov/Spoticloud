@@ -7,6 +7,7 @@
     --glass: rgba(255, 255, 255, 0.05);
 }
 
+/* === БАЗОВЫЕ СТИЛИ === */
 body {
     margin: 0;
     font-family: 'Segoe UI', Roboto, sans-serif;
@@ -22,7 +23,52 @@ body {
     padding-bottom: 120px; /* Чтобы плеер не закрывал контент */
 }
 
-/* Стили авторизации */
+/* Поля ввода (Инпуты) */
+input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    background: #2a2a2a;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: white;
+    box-sizing: border-box;
+}
+
+input:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+/* Кнопки */
+.btn-main {
+    background: var(--accent);
+    color: black;
+    border: none;
+    padding: 14px;
+    width: 100%;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.btn-main:hover {
+    transform: scale(1.03);
+    background: #1ed760;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--text-dim);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+
+/* === ФОРМА АВТОРИЗАЦИИ === */
 .auth-box {
     background: var(--bg-card);
     padding: 40px;
@@ -60,51 +106,89 @@ body {
     border-bottom: 2px solid var(--accent);
 }
 
-/* Поля ввода */
-input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    background: #2a2a2a;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    color: white;
-    box-sizing: border-box;
+
+/* === МИНИМАЛИСТИЧНЫЙ ГЛАЗ ПАРОЛЯ === */
+.password-wrapper {
+    margin-bottom: 0px; /* Сохраняет отступы инпута внутри .form-group */
 }
 
-input:focus {
-    border-color: var(--accent);
+#togglePasswordBtn {
     outline: none;
+    transition: transform 0.1s ease;
 }
 
-/* Кнопки */
-.btn-main {
-    background: var(--accent);
-    color: black;
-    border: none;
-    padding: 14px;
-    width: 100%;
-    border-radius: 25px;
-    font-weight: bold;
+#togglePasswordBtn:active {
+    transform: translateY(-50%) scale(0.9); /* Легкий клик по кнопке */
+}
+
+#togglePasswordBtn svg {
+    transition: stroke 0.2s ease;
+}
+
+#togglePasswordBtn:hover svg {
+    stroke: #fff; /* Подсветка иконки белым при наведении */
+}
+
+
+/* === СОВРЕМЕННЫЙ ТУМБЛЕР (SWITCH) === */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+}
+
+/* Скрываем стандартный чекбокс */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Подложка тумблера */
+.slider {
+    position: absolute;
     cursor: pointer;
-    transition: transform 0.2s;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #404040;
+    transition: 0.3s;
 }
 
-.btn-main:hover {
-    transform: scale(1.03);
-    background: #1ed760;
+/* Ползунок (круг) */
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
 }
 
-.btn-outline {
-    background: transparent;
-    border: 1px solid var(--text-dim);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    cursor: pointer;
+/* Состояние при активации */
+input:checked + .slider {
+    background-color: var(--accent);
 }
 
-/* Сетка треков */
+input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+/* Скругление */
+.slider.round {
+    border-radius: 24px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+
+/* === СЕТКА ТРЕКОВ === */
 .track-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -116,7 +200,7 @@ input:focus {
     background: var(--bg-card);
     padding: 15px;
     border-radius: 12px;
-    transition: 0.3s;
+    transition: background-color 0.3s;
     position: relative;
     cursor: pointer;
 }
@@ -133,7 +217,128 @@ input:focus {
     margin-bottom: 10px;
 }
 
-/* Плеер */
+
+/* === БОКОВАЯ ПАНЕЛЬ (SIDEBAR) === */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -300px; /* Спрятана за левый край экрана */
+    width: 300px;
+    height: 100%;
+    background-color: #121212;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    transition: left 0.3s ease;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+}
+
+.btn-close-sidebar {
+    background: none;
+    border: none;
+    color: #b3b3b3;
+    font-size: 28px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-close-sidebar:hover {
+    color: #fff;
+}
+
+/* Профиль юзера внутри сайдбара */
+.user-profile-card {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.avatar-placeholder {
+    font-size: 50px;
+    background: #282828;
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 15px auto;
+}
+
+.user-profile-card h2 {
+    color: #fff;
+    margin: 0 0 5px 0;
+    font-size: 20px;
+}
+
+.role-badge {
+    color: var(--accent);
+    background: rgba(29, 185, 84, 0.1);
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: inline-block;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* Интерактивные кнопки сайдбара */
+.btn-sidebar-action {
+    width: 100%;
+    background: #282828;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: left;
+    margin-bottom: 10px;
+    transition: background-color 0.2s;
+}
+
+.btn-sidebar-action:hover {
+    background: #333;
+}
+
+.logout-btn {
+    color: #e91429;
+    background: transparent;
+    transition: background-color 0.2s;
+}
+
+.logout-btn:hover {
+    background: rgba(233, 20, 41, 0.1);
+}
+
+/* Подложка-оверлей фона */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9998;
+    display: none;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+
+/* === ПЛЕЕР (PLAYER BAR) === */
 .player-bar {
     position: fixed;
     bottom: 0;
@@ -165,121 +370,197 @@ input:focus {
 
 audio {
     width: 40%;
-    filter: invert(1); /* Чтобы стандартный плеер был белым */
-}
-/* Боковая панель */
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: -300px; /* Изначально спрятана слева */
-    width: 300px;
-    height: 100%;
-    background-color: #121212;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
-    z-index: 10000;
-    transition: left 0.3s ease;
-    padding: 20px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+    filter: invert(1); /* Делает стандартные элементы управления светлыми */
 }
 
-/* Когда панель открыта */
-.sidebar.active {
-    left: 0;
-}
 
-/* Кнопка закрытия */
-.btn-close-sidebar {
-    background: none;
-    border: none;
-    color: #b3b3b3;
-    font-size: 28px;
+/* === СТИЛИ ДЛЯ СТРАНИЦЫ АРТИСТА === */
+
+/* Кнопка "Назад" в строгом стиле Spotify */
+.btn-back-custom {
+    background: #1a1a1a;
+    color: #ffffff;
+    border: 1px solid #333333;
+    padding: 8px 18px;
+    border-radius: 20px;
     cursor: pointer;
-}
-.btn-close-sidebar:hover {
-    color: #fff;
-}
-
-.sidebar-header {
-    display: flex;
-    justify-content: space-between;
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.2s ease;
+    outline: none;
+    box-shadow: none;
+    display: inline-flex;
     align-items: center;
-    color: #fff;
+    gap: 8px;
 }
 
-/* Карточка юзера */
-.user-profile-card {
-    text-align: center;
-    margin-top: 30px;
+/* Эффект наведения для кнопок "Назад" */
+.btn-back-custom:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background-color: rgba(29, 185, 84, 0.05);
 }
 
-.avatar-placeholder {
-    font-size: 50px;
-    background: #282828;
-    width: 80px;
-    height: 80px;
-    line-height: 80px;
-    border-radius: 50%;
-    margin: 0 auto 15px auto;
-}
-
-.user-profile-card h2 {
-    color: #fff;
-    margin: 0 0 5px 0;
-    font-size: 20px;
-}
-
-.role-badge {
-    color: #1db954;
-    background: rgba(29, 185, 84, 0.1);
-    padding: 4px 10px;
-    border-radius: 12px;
-    display: inline-block;
-    font-size: 12px;
-    text-transform: uppercase;
-    font-weight: bold;
-}
-
-/* Кнопки в сайдбаре */
-.btn-sidebar-action {
-    width: 100%;
-    background: #282828;
-    color: #fff;
-    border: none;
-    padding: 12px;
+/* Варнинг "ЗАПОЛНИ КАРТОЧКУ" */
+.profile-warning {
+    background-color: rgba(233, 20, 41, 0.15);
+    border: 1px solid #e91429;
+    color: #ff5c6c;
+    padding: 15px;
     border-radius: 8px;
-    cursor: pointer;
+    margin-bottom: 20px;
     font-weight: bold;
-    text-align: left;
-    margin-bottom: 10px;
-    transition: background 0.2s;
+    text-align: center;
+    animation: pulse 2s infinite;
 }
 
-.btn-sidebar-action:hover {
-    background: #333;
+@keyframes pulse {
+    0% { opacity: 0.9; }
+    50% { opacity: 1; transform: scale(1.01); }
+    100% { opacity: 0.9; }
 }
 
-.logout-btn {
-    color: #e91429;
-    background: transparent;
-}
-.logout-btn:hover {
-    background: rgba(233, 20, 41, 0.1);
+/* Варнинг успешного сохранения */
+.profile-success {
+    background-color: rgba(29, 185, 84, 0.15);
+    border: 1px solid #1db954;
+    color: #1ed760;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(29, 185, 84, 0.1);
 }
 
-/* Затемнение заднего фона */
-.sidebar-overlay {
-    position: fixed;
+/* Геройский баннер артиста */
+.artist-card-hero {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden; /* Обрезаем размытые края фоновой картинки */
+    background: #1e1e1e;
+    min-height: 280px;
+    display: flex;
+    align-items: flex-end;
+    padding: 30px;
+    box-sizing: border-box;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+}
+
+/* ИСПРАВЛЕННЫЙ ЗАБЛЮРЕННЫЙ ЗАДНИЙ ФОН БАННЕРА */
+.artist-hero-bg {
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 9998;
-    display: none;
+    background-size: cover;
+    background-position: center;
+
+    /* ЖЕСТКИЙ ФИКС БЛЮРА: Размываем фон и чуть-чуть его увеличиваем, чтобы скрыть белые края */
+    filter: blur(12px) brightness(0.45);
+    transform: scale(1.08);
+
+    z-index: 1;
 }
 
-.sidebar-overlay.active {
-    display: block;
+.artist-hero-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    width: 100%;
+}
+
+@media (max-width: 600px) {
+    .artist-hero-content { flex-direction: column; text-align: center; }
+}
+
+/* Круглая аватарка артиста */
+.artist-avatar-container img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--bg-card);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+}
+
+.artist-hero-text h1 {
+    font-size: 2.5rem;
+    margin: 5px 0;
+    font-weight: 800;
+}
+
+.verified-badge {
+    color: #3d91ff;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.listeners-count {
+    color: var(--text-main);
+    font-size: 15px;
+    margin: 5px 0 12px 0;
+    font-weight: 500;
+}
+
+.artist-bio-text {
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 600px;
+    margin: 0;
+}
+
+/* Стилизация текстового поля */
+textarea:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+
+/* === КАСТОМНЫЕ ИНПУТЫ ЗАГРУЗКИ ФАЙЛОВ === */
+.custom-file-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+    background: #181818;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #282828;
+}
+
+.custom-file-trigger {
+    background: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #444444;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.custom-file-trigger:hover {
+    border-color: var(--accent);
+    background-color: #333333;
+}
+
+.custom-file-text {
+    color: #b3b3b3;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 250px;
+}
+
+.custom-file-text.file-selected {
+    color: #1ed760;
 }
