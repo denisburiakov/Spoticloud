@@ -39,6 +39,7 @@ public class ArtistProfileController {
             return artistProfileRepository.findByUserUsername(username)
                     .map(profile -> {
                         Map<String, Object> responseMap = new HashMap<>();
+                        responseMap.put("id", profile.getId());
                         responseMap.put("name", profile.getName());
                         responseMap.put("bio", profile.getBio() != null ? profile.getBio() : "");
                         responseMap.put("listeners", profile.getMonthlyListeners() != null ? profile.getMonthlyListeners() : 0);

@@ -217,18 +217,19 @@ async function checkAndRenderArtistProfile() {
     if (displayBlock) {
         const editBtn = displayBlock.querySelector('.btn-outline');
         if (editBtn) editBtn.innerText = dict.btnEditProfile;
+
+        // УБРАЛИ ГАЛОЧКУ: Намертво скрываем плашку верификации артиста
         const badge = displayBlock.querySelector('.verified-badge');
-        if (badge) badge.innerText = dict.verifiedArtist;
+        if (badge) badge.style.display = 'none';
     }
 
     if (document.getElementById('artistDisplayName')) document.getElementById('artistDisplayName').innerText = currentUsername;
 
     try {
         console.log(`Fetch профиля для: ${currentUsername}`);
-        // Стучимся ровно на твой эндпоинт контроллера
         const response = await fetch(`http://localhost:8081/api/v1/artist/profile?username=${currentUsername}`);
 
-        // СЛУЧАЙ А: 404 (в бэке сработал .orElse(ResponseEntity.notFound().build()))
+        // СЛУЧАЙ А: 404 (Профиль не заполнен)
         if (response.status === 404) {
             if (warningBlock) warningBlock.style.display = 'block';
             if (successBlock) successBlock.style.display = 'none';
@@ -236,6 +237,13 @@ async function checkAndRenderArtistProfile() {
             if (formBlock) formBlock.style.display = 'block';
             if (cancelBtn) cancelBtn.style.display = 'none';
             if (formTitle) formTitle.innerText = dict.formTitleFill;
+
+            // ФИКС КНОПОК 1: Стилизуем дефолтные инпуты при первом заполнении формы
+            const avatarInp = document.getElementById('artistAvatarFile');
+            const bgInp = document.getElementById('artistBgFile');
+            if (avatarInp) setupCustomFileInput(avatarInp, 'custom-avatar-file-btn', 'custom-avatar-file-text', dict.btnChooseAvatar, dict.fileNotSelected);
+            if (bgInp) setupCustomFileInput(bgInp, 'custom-bg-file-btn', 'custom-bg-file-text', dict.btnChooseBg, dict.fileNotSelected);
+
             return;
         }
 
@@ -243,7 +251,6 @@ async function checkAndRenderArtistProfile() {
         if (response.ok) {
             const profileData = await response.json();
 
-            // Кэшируем для редактора
             artistProfile.listeners = profileData.listeners || 0;
             artistProfile.bio = profileData.bio || '';
 
@@ -252,7 +259,12 @@ async function checkAndRenderArtistProfile() {
             if (formBlock) formBlock.style.display = 'none';
             if (formTitle) formTitle.innerText = dict.formTitleEdit;
 
-            // Выводим количество слушателей из твоего Map.of("listeners", ...)
+            // ФИКС КНОПОК 2: Стилизуем дефолтные инпуты на случай, если нажмут "Редактировать профиль"
+            const avatarInp = document.getElementById('artistAvatarFile');
+            const bgInp = document.getElementById('artistBgFile');
+            if (avatarInp) setupCustomFileInput(avatarInp, 'custom-avatar-file-btn', 'custom-avatar-file-text', dict.btnChooseAvatar, dict.fileNotSelected);
+            if (bgInp) setupCustomFileInput(bgInp, 'custom-bg-file-btn', 'custom-bg-file-text', dict.btnChooseBg, dict.fileNotSelected);
+
             const formattedListeners = Number(profileData.listeners || 0).toLocaleString(currentLang === 'ru' ? 'ru-RU' : 'en-US');
             const listenersDisplay = document.getElementById('artistDisplayListeners');
             if (listenersDisplay) {
@@ -265,23 +277,40 @@ async function checkAndRenderArtistProfile() {
                 document.getElementById('artistDisplayBio').innerText = profileData.bio || dict.bioEmpty;
             }
 
-            // ИСПРАВЛЕНО: Склеиваем аватарку с хостом Spring Boot
             if (document.getElementById('artistDisplayAvatar')) {
                 document.getElementById('artistDisplayAvatar').src = profileData.avatarUrl
                     ? `http://localhost:8081${profileData.avatarUrl}`
                     : 'https://via.placeholder.com/150';
             }
 
-            // ИСПРАВЛЕНО: Склеиваем баннер с хостом Spring Boot
+            // ФОРС БЛЮРА: Сохраняем логику красивого размытия фона
             const heroBg = document.getElementById('artistHeroBg');
             if (heroBg) {
                 if (profileData.backgroundUrl) {
                     heroBg.style.backgroundImage = `url('http://localhost:8081${profileData.backgroundUrl}')`;
+                    heroBg.style.filter = 'blur(12px) brightness(0.45)';
+                    heroBg.style.transform = 'scale(1.08)';
                 } else {
                     heroBg.style.backgroundImage = 'none';
                     heroBg.style.backgroundColor = '#282828';
+                    heroBg.style.filter = 'none';
+                    heroBg.style.transform = 'none';
                 }
             }
+
+
+                    const myReleasesSec = document.getElementById('artistMyReleasesSection');
+                    if (myReleasesSec) {
+                        myReleasesSec.style.display = 'block';
+                    }
+
+
+                    console.log("Данные профиля с бэка:", profileData); // Чекаем в F12, что вообще прислал сервер
+                    if (profileData.id) {
+                        fetchArtistTracks(profileData.id, true); // Передаем true, чтобы заливать в 'artistOwnTrackList'
+                    } else {
+                        console.error("Критическая ошибка: Бэкенд не вернул id артиста в объекте профиля!");
+                    }
         }
     } catch (e) {
         console.error("Ошибка при получении профиля:", e);
@@ -325,6 +354,12 @@ function changeLanguage(lang) {
     if (trackFileInput) setupCustomFileInput(trackFileInput, 'custom-track-file-btn', 'custom-track-file-text', dict.btnChooseTrack, dict.fileNotSelected);
     if (coverFileInput) setupCustomFileInput(coverFileInput, 'custom-cover-file-btn', 'custom-cover-file-text', dict.btnChooseCover, dict.fileNotSelected);
 
+    if (trackFileInput) setupCustomFileInput(trackFileInput, 'custom-track-file-btn', 'custom-track-file-text', dict.btnChooseTrack, dict.fileNotSelected);
+        if (coverFileInput) setupCustomFileInput(coverFileInput, 'custom-cover-file-btn', 'custom-cover-file-text', dict.btnChooseCover, dict.fileNotSelected);
+    const avatarFileInput = document.getElementById('artistAvatarFile');
+        const bgFileInput = document.getElementById('artistBgFile');
+        if (avatarFileInput) setupCustomFileInput(avatarFileInput, 'custom-avatar-file-btn', 'custom-avatar-file-text', dict.btnChooseAvatar, dict.fileNotSelected);
+        if (bgFileInput) setupCustomFileInput(bgFileInput, 'custom-bg-file-btn', 'custom-bg-file-text', dict.btnChooseBg, dict.fileNotSelected);
     const profilePage = document.getElementById('artist-profile-page');
     if (profilePage && (profilePage.style.display === 'block' || profilePage.style.display === 'flex')) {
         checkAndRenderArtistProfile();
@@ -696,22 +731,34 @@ function goToPublicArtistPage(artistId, artistName) {
     fetchArtistTracks(artistId);
 }
 
-async function fetchArtistTracks(artistId) {
-    const artistTrackList = document.getElementById('artistTrackList');
+async function fetchArtistTracks(artistId, isOwnProfile = false) {
+    // 1. Выбираем правильный контейнер в зависимости от флага
+    const targetId = isOwnProfile ? 'artistOwnTrackList' : 'artistPublicTrackList';
+    const artistTrackList = document.getElementById(targetId);
+
+    console.log(`Функция fetchArtistTracks вызвана! Ищем контейнер: #${targetId}. Найдено?`, !!artistTrackList);
     if (!artistTrackList) return;
+
     try {
-        const res = await fetch(`http://localhost:8081/api/v1/tracks?artistId=${artistId}`);
+        const url = `http://localhost:8081/api/v1/tracks?artistId=${artistId}`;
+        console.log("Отправляем запрос на треки по URL:", url);
+
+        const res = await fetch(url);
         if (!res.ok) throw new Error("Не удалось загрузить треки артиста");
 
         const tracks = await res.json();
+        console.log("Что пришло из api/v1/tracks от бэка:", tracks);
+
         artistTrackList.innerHTML = '';
 
         if (!tracks || tracks.length === 0) {
+            console.log("Бэк вернул пустой массив треков для этого артиста.");
             artistTrackList.innerHTML = `<p class="status-msg" style="color: #b3b3b3; margin-left: 20px;">${translations[currentLang].profileNoTracks}</p>`;
             return;
         }
 
         tracks.forEach(track => {
+            console.log("Рендерим карточку для трека:", track.title);
             const card = document.createElement('div');
             card.className = 'track-card';
 
@@ -734,8 +781,10 @@ async function fetchArtistTracks(artistId) {
 
             artistTrackList.appendChild(card);
         });
+        console.log("Отрисовка карточек успешно завершена!");
+
     } catch (e) {
-        console.error(e);
+        console.error("Ошибка внутри fetchArtistTracks:", e);
         artistTrackList.innerHTML = '<p class="status-msg" style="color: red; margin-left: 20px;">Error...</p>';
     }
 }

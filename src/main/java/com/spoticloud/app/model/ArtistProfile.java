@@ -1,5 +1,6 @@
 package com.spoticloud.app.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,7 @@ public class ArtistProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JsonProperty("id")
     private UUID id;
 
     @OneToOne
@@ -37,12 +39,15 @@ public class ArtistProfile {
 
     // НОВОЕ ПОЛЕ: Ежемесячные слушатели (то, что просил фронтенд)
     @Column(name = "monthly_listeners")
+    @JsonProperty("listeners")
     private Integer monthlyListeners = 0;
 
     @Column(name = "profile_picture_url")
+    @JsonProperty("avatarUrl")
     private String profilePictureUrl; // Твой аватар на фронте
 
     @Column(name = "header_image_url")
+    @JsonProperty("backgroundUrl")
     private String headerImageUrl; // Твой баннер (задний фон) на фронте
 
     @JdbcTypeCode(SqlTypes.JSON)

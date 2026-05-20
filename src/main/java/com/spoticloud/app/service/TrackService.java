@@ -103,4 +103,11 @@ public class TrackService {
             throw new RuntimeException("Ошибка при сохранении файла: " + fullPath, e);
         }
     }
+
+    public List<Track> getTracksByArtistId(UUID artistId) {
+        if (artistId == null) {
+            return java.util.Collections.emptyList();
+        }
+        return trackRepository.findByArtistId(artistId);
+    }
 }

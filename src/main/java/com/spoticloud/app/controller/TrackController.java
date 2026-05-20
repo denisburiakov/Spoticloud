@@ -77,7 +77,8 @@ public class TrackController {
             if (search != null && !search.isBlank()) {
                 tracks = trackService.searchTracks(search);
             } else if (artistId != null) {
-                tracks = trackService.getTracksByArtist(artistId);
+                // ИСПРАВЛЕНО: Вызываем метод сервиса, согласующийся с UUID и репозиторием
+                tracks = trackService.getTracksByArtistId(artistId);
             } else {
                 tracks = trackService.getAllTracks();
             }

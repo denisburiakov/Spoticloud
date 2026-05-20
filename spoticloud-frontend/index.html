@@ -117,7 +117,31 @@
         </div>
     </section>
 
-    <section id="artist-public-page" class="view" style="display:none;"></section>
+    <section id="artist-public-page" class="view" style="display:none;">
+        <header class="sub-header" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+            <button onclick="showView('main-page')" class="btn-back-custom" data-translate="profileBackBtn">← Назад на Главную</button>
+            <p style="color: #b3b3b3; margin: 0; font-size: 14px;" data-translate="profileSubTitle">Официальный профиль исполнителя</p>
+        </header>
+
+        <div class="artist-card-hero" style="position: relative; border-radius: 12px; overflow: hidden; background: #282828; min-height: 280px; display: flex; flex-direction: column; justify-content: flex-end;">
+            <div class="artist-hero-bg" id="artistPublicHeroBg" style="position: absolute; top:0; left:0; width:100%; height:100%; background-size: cover; background-position: center; z-index: 1;"></div>
+
+            <div class="artist-hero-content" style="position: relative; z-index: 2; padding: 30px; display: flex; align-items: center; gap: 25px; flex-wrap: wrap;">
+                <div class="artist-avatar-container" style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); background: #181818;">
+                    <img id="artistPublicDisplayAvatar" src="https://via.placeholder.com/150" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div class="artist-hero-text" style="flex: 1; color: white;">
+                    <h1 id="artistPublicDisplayName" style="font-size: 42px; margin: 0 0 10px 0; font-weight: 800;">Имя Артиста</h1>
+                    <p class="listeners-count" style="margin: 0 0 10px 0; font-size: 16px; color: #e0e0e0; font-weight: 600;"><span id="artistPublicDisplayListeners">0</span> <span data-translate="listenersSuffix">слушателей за месяц</span></p>
+                    <p id="artistPublicDisplayBio" class="artist-bio-text" style="margin: 0; color: #b3b3b3; max-width: 600px; line-height: 1.5; font-size: 14px;">Биография...</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 style="color: #fff; margin-top: 30px; margin-bottom: 15px; font-size: 22px;" data-translate="profileReleases">Все релизы</h3>
+        <div id="artistPublicTrackList" class="track-grid">
+        </div>
+    </section>
 
     <section id="artist-profile-page" class="view" style="display:none;">
         <header class="sub-header" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
@@ -141,9 +165,9 @@
                     <img id="artistDisplayAvatar" src="https://via.placeholder.com/150" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div class="artist-hero-text" style="flex: 1; color: white;">
-                    <span class="verified-badge" style="background: #007eed; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; margin-bottom: 8px;">✓ Подтвержденный артист</span>
+                    <span class="verified-badge" style="background: #007eed; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: none; margin-bottom: 8px;">✓ Подтвержденный артист</span>
                     <h1 id="artistDisplayName" style="font-size: 42px; margin: 0 0 10px 0; font-weight: 800;">Имя Артиста</h1>
-                    <p class="listeners-count" style="margin: 0 0 10px 0; font-size: 16px; color: #e0e0e0; font-weight: 600;"><span id="artistDisplayListeners">0</span> слушателей за месяц</p>
+                    <p class="listeners-count" style="margin: 0 0 10px 0; font-size: 16px; color: #e0e0e0; font-weight: 600;"><span id="artistDisplayListeners">0</span> <span data-translate="listenersSuffix">слушателей за месяц</span></p>
                     <p id="artistDisplayBio" class="artist-bio-text" style="margin: 0; color: #b3b3b3; max-width: 600px; line-height: 1.5; font-size: 14px;">Здесь будет твое описание...</p>
                     <button onclick="openArtistEditor()" class="btn-outline" style="margin-top: 15px; padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 20px; border: 1px solid #b3b3b3; background: transparent; color: white; cursor: pointer; transition: all 0.2s;">Редактировать профиль</button>
                 </div>
@@ -173,6 +197,12 @@
                     <button onclick="saveArtistProfile()" class="btn-main" style="width: auto; padding: 12px 24px;">Сохранить профиль</button>
                     <button id="cancelArtistEditBtn" onclick="closeArtistEditor()" class="btn-outline" style="display: none; padding: 12px 24px; border-radius: 24px;">Отмена</button>
                 </div>
+            </div>
+        </div>
+
+        <div id="artistMyReleasesSection" style="display: none; margin-top: 30px;">
+            <h3 style="color: #fff; margin-bottom: 15px; font-size: 22px;" data-translate="profileReleases">Все релизы</h3>
+            <div id="artistOwnTrackList" class="track-grid">
             </div>
         </div>
     </section>
