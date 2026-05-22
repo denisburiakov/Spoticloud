@@ -491,6 +491,10 @@ function showView(viewId) {
         playerBar.style.display = (viewId === 'auth-page') ? 'none' : 'flex';
     }
 
+    if (viewId === 'main-page') {
+            fetchTracks();
+        }
+
     if (viewId === 'artist-profile-page') {
         checkAndRenderArtistProfile();
     }
@@ -579,17 +583,17 @@ async function saveArtistProfile() {
     const currentUsername = localStorage.getItem('username');
     if (!currentUsername) return alert(translations[currentLang].alertNotAuth);
 
-    const listeners = document.getElementById('artistListenersInput').value;
     const bio = document.getElementById('artistBioInput').value.trim();
     const avatarFile = document.getElementById('artistAvatarFile');
     const bgFile = document.getElementById('artistBgFile');
 
-    if (!listeners || !bio) return alert(translations[currentLang].alertFormError);
+    // ИСПРАВЛЕНО: Убрали listeners из проверки, теперь проверяем только заполнение био
+    if (!bio) return alert(translations[currentLang].alertFormError);
 
     // Пакуем Multipart FormData точь-в-точь как требует твой `@PostMapping`
     const formData = new FormData();
     formData.append('username', currentUsername);
-    formData.append('listeners', listeners);
+    formData.append('listeners', '0'); // Шлем заглушку, бэк её сам перекроет реальным подсчетом
     formData.append('bio', bio);
 
     if (avatarFile && avatarFile.files[0]) formData.append('avatar', avatarFile.files[0]);
@@ -676,12 +680,39 @@ function playTrack(url, title, cover, artistName, artistId) {
     if (!url) return alert(translations[currentLang].alertNoAudio);
     if (!mainAudio) return;
 
+    // Назначаем источник трека и запускаем его
     mainAudio.src = `http://localhost:8081/media/tracks/${url}`;
-    mainAudio.play().catch(e => console.error("Ошибка воспроизведения:", e));
+    mainAudio.play()
+        .then(() => {
+            // АВТОМАТИЧЕСКИЙ ТРИГГЕР СТРИМА
+            const currentUsername = localStorage.getItem('username');
 
+            // Если юзер авторизован и у трека есть artistId — шлем запрос на бэк
+            if (currentUsername && artistId) {
+                const streamData = new FormData();
+                streamData.append('artistId', artistId);
+                streamData.append('username', currentUsername);
+
+                console.log(`Отправляем стрим: артист ${artistId}, слушает ${currentUsername}`);
+
+                fetch('http://localhost:8081/api/v1/artist/profile/stream', {
+                    method: 'POST',
+                    body: streamData
+                })
+                .then(res => {
+                    if (!res.ok) console.error("Бэкэнд не смог засчитать стрим");
+                    else console.log("Стрим успешно засчитан в базу!");
+                })
+                .catch(err => console.error("Ошибка сети при отправке стрима:", err));
+            }
+        })
+        .catch(e => console.error("Ошибка воспроизведения трека:", e));
+
+    // Обновляем плеер-бар (название и обложку)
     if (currentTitle) currentTitle.innerText = title;
     if (playerCover) playerCover.src = cover;
 
+    // Делаем имя артиста в плеере кликабельным, чтобы можно было перейти на его страницу
     const playerArtistContainer = document.getElementById('currentTrackArtist');
     if (playerArtistContainer) {
         playerArtistContainer.innerHTML = `<span class="player-artist-link" style="color: #b3b3b3; cursor: pointer; font-size: 14px; transition: color 0.2s;">${artistName || 'Unknown Artist'}</span>`;
@@ -694,41 +725,73 @@ function playTrack(url, title, cover, artistName, artistId) {
     }
 }
 
-// ================= ЛОГИКА ПУБЛИЧНОЙ СТРАНИЦЫ АРТИСТА =================
 
-function goToPublicArtistPage(artistId, artistName) {
+async function goToPublicArtistPage(artistId, artistName) {
+    console.log("Переход на публичную страницу артиста:", artistName, "с ID:", artistId);
     if (!artistId) return alert(translations[currentLang].alertNoArtistProfile);
 
+    // Скрываем все страницы и показываем нужную
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
-
     const container = document.getElementById('artist-public-page');
-    if (!container) {
-        alert("Критическая ошибка: Добавьте <div id='artist-public-page' class='view' style='display:none;'></div> в index.html");
-        return;
-    }
+    if (!container) return console.error("Элемент #artist-public-page не найден в HTML!");
     container.style.display = 'block';
 
     const dict = translations[currentLang];
 
-    container.innerHTML = `
-        <div class="artist-header" style="padding: 24px; background: linear-gradient(transparent, #121212), #282828; margin-bottom: 20px; border-radius: 8px; position: relative;">
-            <button onclick="showView('main-page')" class="btn-back-custom" style="background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 18px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 13px; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease; backdrop-filter: blur(10px);">
-                ${dict.profileBackBtn}
-            </button>
-            <h1 style="color: #fff; font-size: 48px; margin: 0; font-weight: 800; letter-spacing: -1px;">${artistName}</h1>
-            <p style="color: #b3b3b3; margin: 5px 0 0 0; font-size: 14px;">${dict.profileSubTitle}</p>
-        </div>
-        <h3 style="color: #fff; margin-left: 20px; margin-bottom: 15px; font-size: 20px;">${dict.profileReleases}</h3>
-        <div id="artistTrackList" class="track-grid"></div>
-    `;
+    // Ставим дефолтные заглушки на время загрузки
+    if (document.getElementById('artistPublicDisplayName')) document.getElementById('artistPublicDisplayName').innerText = artistName;
+    if (document.getElementById('artistPublicDisplayListeners')) document.getElementById('artistPublicDisplayListeners').innerText = "0";
+    if (document.getElementById('artistPublicDisplayBio')) document.getElementById('artistPublicDisplayBio').innerText = dict.bioEmpty;
+    if (document.getElementById('artistPublicDisplayAvatar')) document.getElementById('artistPublicDisplayAvatar').src = 'https://via.placeholder.com/150';
 
-    const backBtn = container.querySelector('.btn-back-custom');
-    if (backBtn) {
-        backBtn.onmouseenter = () => { backBtn.style.borderColor = '#1db954'; backBtn.style.color = '#1db954'; backBtn.style.backgroundColor = 'rgba(29, 185, 84, 0.1)'; backBtn.style.transform = 'scale(1.03)'; };
-        backBtn.onmouseleave = () => { backBtn.style.borderColor = 'rgba(255,255,255,0.1)'; backBtn.style.color = '#fff'; backBtn.style.backgroundColor = 'rgba(0,0,0,0.5)'; backBtn.style.transform = 'scale(1)'; };
+    const heroBg = document.getElementById('artistPublicHeroBg');
+    if (heroBg) {
+        heroBg.style.backgroundImage = 'none';
+        heroBg.style.backgroundColor = '#282828';
+        heroBg.style.filter = 'none';
+        heroBg.style.transform = 'none';
     }
 
-    fetchArtistTracks(artistId);
+    try {
+        // Делаем запрос к твоему контроллеру по имени артиста
+        const response = await fetch(`http://localhost:8081/api/v1/artist/profile?username=${encodeURIComponent(artistName)}`);
+
+        if (response.ok) {
+            const profileData = await response.json();
+            console.log("Данные публичного профиля от бэка:", profileData);
+
+            // Заполняем количество слушателей
+            const formattedListeners = Number(profileData.listeners || 0).toLocaleString(currentLang === 'ru' ? 'ru-RU' : 'en-US');
+            const listenersDisplay = document.getElementById('artistPublicDisplayListeners');
+            if (listenersDisplay) {
+                listenersDisplay.innerText = formattedListeners;
+            }
+
+            // Заполняем биографию
+            if (document.getElementById('artistPublicDisplayBio')) {
+                document.getElementById('artistPublicDisplayBio').innerText = profileData.bio || dict.bioEmpty;
+            }
+
+            // Ставим аватарку (используем avatarUrl, который шлет мапа твоего контроллера)
+            if (profileData.avatarUrl && document.getElementById('artistPublicDisplayAvatar')) {
+                document.getElementById('artistPublicDisplayAvatar').src = `http://localhost:8081${profileData.avatarUrl}`;
+            }
+
+            // Красиво размываем задний фон баннера артиста
+            if (heroBg && profileData.backgroundUrl) {
+                heroBg.style.backgroundImage = `url('http://localhost:8081${profileData.backgroundUrl}')`;
+                heroBg.style.filter = 'blur(12px) brightness(0.45)';
+                heroBg.style.transform = 'scale(1.08)';
+            }
+        } else {
+            console.warn("Бэкенд вернул ошибку для профиля:", artistName);
+        }
+    } catch (e) {
+        console.error("Ошибка при подтягивании публичного профиля:", e);
+    }
+
+    // Запускаем загрузку треков. Передаем false, чтобы они отрендерились в 'artistPublicTrackList'
+    fetchArtistTracks(artistId, false);
 }
 
 async function fetchArtistTracks(artistId, isOwnProfile = false) {
