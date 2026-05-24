@@ -4,7 +4,13 @@ const mainAudio = document.getElementById('mainAudio');
 const currentTitle = document.getElementById('currentTrackTitle');
 const playerCover = document.getElementById('playerCover');
 const langSelect = document.getElementById('langSelect');
+// Используем только эти две переменные для состояний
+let isLoopActive = false;
+let isShuffleActive = false;
+const audio = document.getElementById('mainAudio');
 
+let currentTrackIndex = 0;
+let tracks = [];
 let currentOpenedArtistId = null;
 let playerState = {
     queue: [],         // Массив объектов треков, которые сейчас проигрываются
@@ -830,16 +836,6 @@ function playCurrentTrack() {
     }
 }
 
-// 3. Функция кнопки «Вперед»
-function playNextTrack() {
-    if (playerState.queue.length === 0) return;
-
-    // Идем к следующему треку. Если это был последний — прыгаем в начало (на 0)
-    playerState.currentIndex = (playerState.currentIndex + 1) % playerState.queue.length;
-    console.log(`Переключаю вперед на индекс: ${playerState.currentIndex}`);
-    playCurrentTrack();
-}
-
 // 4. Функция кнопки «Назад»
 function playPreviousTrack() {
     if (playerState.queue.length === 0) return;
@@ -1173,6 +1169,63 @@ function togglePasswordVisibility() {
             }
         }
     }
+// 1. Кнопка Loop
+function toggleLoop() {
+    isLoopActive = !isLoopActive;
+    const btn = document.getElementById('loopBtn');
+    btn.style.color = isLoopActive ? '#8a55ec' : '#b3b3b3';
+
+    // ВАЖНО: стандартный audio.loop нам тут мешает, если мы делаем свою логику,
+    // поэтому управляем этим через событие ended
+    audio.loop = false;
+}
+
+// 2. Кнопка Shuffle
+function toggleShuffle() {
+    isShuffleActive = !isShuffleActive;
+    const btn = document.getElementById('shuffleBtn');
+    btn.style.color = isShuffleActive ? '#8a55ec' : '#b3b3b3';
+}
+
+// 3. Единая логика переключения
+function playNextTrack() {
+    if (playerState.queue.length === 0) return;
+
+    // ЕСЛИ ВКЛЮЧЕН LOOP:
+    // Мы просто запускаем текущий трек заново (перематываем в начало)
+    if (isLoopActive) {
+        audio.currentTime = 0;
+        audio.play();
+        return; // Выходим из функции, переключения на другой трек не будет
+    }
+
+    // ЕСЛИ LOOP ВЫКЛЮЧЕН:
+    // Работает стандартная логика переключения (Shuffle или по порядку)
+    if (isShuffleActive && playerState.queue.length > 1) {
+        let nextIndex;
+        do {
+            nextIndex = Math.floor(Math.random() * playerState.queue.length);
+        } while (nextIndex === playerState.currentIndex);
+        playerState.currentIndex = nextIndex;
+    } else {
+        playerState.currentIndex = (playerState.currentIndex + 1) % playerState.queue.length;
+    }
+
+    playCurrentTrack();
+}
+
+
+audio.addEventListener('ended', () => {
+    if (isLoopActive) {
+
+        audio.currentTime = 0;
+        audio.play();
+    } else {
+
+        playNextTrack();
+    }
+});
+
 
 
 window.onload = () => {
