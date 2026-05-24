@@ -1,8 +1,10 @@
 package com.spoticloud.app.controller;
 
+import com.spoticloud.app.model.ArtistFollower;
 import com.spoticloud.app.model.ArtistListener;
 import com.spoticloud.app.model.ArtistProfile;
 import com.spoticloud.app.model.User;
+import com.spoticloud.app.repository.ArtistFollowerRepository;
 import com.spoticloud.app.repository.ArtistListenerRepository;
 import com.spoticloud.app.repository.ArtistProfileRepository;
 import com.spoticloud.app.repository.UserRepository;
@@ -26,16 +28,19 @@ public class ArtistProfileController {
     private final ArtistProfileRepository artistProfileRepository;
     private final UserRepository userRepository;
     private final ArtistListenerRepository artistListenerRepository;
+    private final ArtistFollowerRepository artistFollowerRepository;
 
+    // Не забудь добавить его аргументом в твой конструктор контроллера!
     // ЖЕСТКИЙ ФИКС ПУТИ: Направляем контроллер прямо в папку на диске C:
     private final String uploadFolder = "C:/spcl_uploads/spoticloud_artists/";
 
     public ArtistProfileController(ArtistProfileRepository artistProfileRepository,
                                    UserRepository userRepository,
-                                   ArtistListenerRepository artistListenerRepository) {
+                                   ArtistListenerRepository artistListenerRepository, ArtistFollowerRepository artistFollowerRepository) {
         this.artistProfileRepository = artistProfileRepository;
         this.userRepository = userRepository;
         this.artistListenerRepository = artistListenerRepository;
+        this.artistFollowerRepository = artistFollowerRepository;
     }
 
     @GetMapping
@@ -109,6 +114,43 @@ public class ArtistProfileController {
         }
     }
 
+    // 1. ПОДПИСАТЬСЯ / ОТПИСАТЬСЯ (Toggle-метод)
+    @PostMapping("/{artistId}/follow")
+    @org.springframework.transaction.annotation.Transactional // Нужен для удаления из БД
+    public ResponseEntity<?> toggleFollow(@PathVariable UUID artistId, @RequestParam String username) {
+        try {
+            boolean alreadyFollows = artistFollowerRepository.existsByArtistIdAndUsername(artistId, username);
+
+            if (alreadyFollows) {
+                artistFollowerRepository.deleteByArtistIdAndUsername(artistId, username);
+                return ResponseEntity.ok(java.util.Map.of("subscribed", false, "message", "Успешно отписались"));
+            } else {
+                ArtistFollower follower = ArtistFollower.builder()
+                        .artistId(artistId)
+                        .username(username)
+                        .build();
+                artistFollowerRepository.save(follower);
+                return ResponseEntity.ok(java.util.Map.of("subscribed", true, "message", "Успешно подписались"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при обработке подписки");
+        }
+    }
+
+    // 2. ПОЛУЧИТЬ СТАТУС ПОДПИСКИ И СЧЕТЧИК
+    @GetMapping("/{artistId}/follow-status")
+    public ResponseEntity<?> getFollowStatus(@PathVariable UUID artistId, @RequestParam(required = false) String username) {
+        boolean isSubscribed = false;
+        if (username != null && !username.trim().isEmpty()) {
+            isSubscribed = artistFollowerRepository.existsByArtistIdAndUsername(artistId, username);
+        }
+        long followersCount = artistFollowerRepository.countByArtistId(artistId);
+
+        return ResponseEntity.ok(java.util.Map.of(
+                "isSubscribed", isSubscribed,
+                "followersCount", followersCount
+        ));
+    }
     // ОТДЕЛЬНЫЙ ЭНДПОИНТ ДЛЯ УЧЕТА ПРОСЛУШИВАНИЙ
     @PostMapping("/stream")
     public ResponseEntity<?> registerStream(

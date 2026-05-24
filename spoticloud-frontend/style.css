@@ -1,7 +1,8 @@
 :root {
     --bg-dark: #121212;
     --bg-card: #1e1e1e;
-    --accent: #1db954; /* Тот самый зеленый */
+    --accent: #7247cd; /* Тот самый приятный фиолетовый */
+    --accent-hover: #8a55ec; /* Светлый фиолетовый для ховеров */
     --text-main: #ffffff;
     --text-dim: #b3b3b3;
     --glass: rgba(255, 255, 255, 0.05);
@@ -16,15 +17,50 @@ body {
     min-height: 100vh;
 }
 
+/* Полный Full-width режим: сайт тянется на весь экран с красивыми отступами */
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    padding-bottom: 120px; /* Чтобы плеер не закрывал контент */
+    max-width: 100% !important;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 30px 40px;
+    padding-bottom: 120px; /* Чтобы плеер внизу не перекрывал карточки */
+}
+
+/* Обертка для шапки, раскидывает элементы строго по углам экрана */
+.header-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* Выравнивание по верхнему краю */
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+/* Левая секция шапки (кнопка меню, смена языка и т.д.) */
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Расстояние между кнопкой меню и переключателем языка */
+    align-items: flex-start;
+}
+
+/* Правая секция шапки — кликабельный логотип SpotiCloud */
+.brand-link {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: -1px;
+    transition: color 0.2s ease, transform 0.2s ease;
+    line-height: 1;
+}
+
+.brand-link:hover {
+    color: var(--accent-hover);
+    transform: scale(1.02);
 }
 
 /* Поля ввода (Инпуты) */
-input {
+input, textarea {
     width: 100%;
     padding: 12px;
     margin-bottom: 15px;
@@ -35,7 +71,7 @@ input {
     box-sizing: border-box;
 }
 
-input:focus {
+input:focus, textarea:focus {
     border-color: var(--accent);
     outline: none;
 }
@@ -43,19 +79,21 @@ input:focus {
 /* Кнопки */
 .btn-main {
     background: var(--accent);
-    color: black;
+    color: white;
     border: none;
     padding: 14px;
     width: 100%;
     border-radius: 25px;
     font-weight: bold;
     cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
+    transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
 }
 
 .btn-main:hover {
-    transform: scale(1.03);
-    background: #1ed760;
+    background-color: var(--accent-hover) !important;
+    background: var(--accent-hover) !important;
+    border-color: var(--accent-hover) !important;
+    transform: scale(1.02);
 }
 
 .btn-outline {
@@ -109,7 +147,7 @@ input:focus {
 
 /* === МИНИМАЛИСТИЧНЫЙ ГЛАЗ ПАРОЛЯ === */
 .password-wrapper {
-    margin-bottom: 0px; /* Сохраняет отступы инпута внутри .form-group */
+    margin-bottom: 0px;
 }
 
 #togglePasswordBtn {
@@ -118,7 +156,7 @@ input:focus {
 }
 
 #togglePasswordBtn:active {
-    transform: translateY(-50%) scale(0.9); /* Легкий клик по кнопке */
+    transform: translateY(-50%) scale(0.9);
 }
 
 #togglePasswordBtn svg {
@@ -126,7 +164,7 @@ input:focus {
 }
 
 #togglePasswordBtn:hover svg {
-    stroke: #fff; /* Подсветка иконки белым при наведении */
+    stroke: #fff;
 }
 
 
@@ -138,14 +176,12 @@ input:focus {
     height: 24px;
 }
 
-/* Скрываем стандартный чекбокс */
 .switch input {
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-/* Подложка тумблера */
 .slider {
     position: absolute;
     cursor: pointer;
@@ -157,7 +193,6 @@ input:focus {
     transition: 0.3s;
 }
 
-/* Ползунок (круг) */
 .slider:before {
     position: absolute;
     content: "";
@@ -169,7 +204,6 @@ input:focus {
     transition: 0.3s;
 }
 
-/* Состояние при активации */
 input:checked + .slider {
     background-color: var(--accent);
 }
@@ -178,7 +212,6 @@ input:checked + .slider:before {
     transform: translateX(22px);
 }
 
-/* Скругление */
 .slider.round {
     border-radius: 24px;
 }
@@ -188,12 +221,14 @@ input:checked + .slider:before {
 }
 
 
-/* === СЕТКА ТРЕКОВ === */
+/* === СЕТКА ТРЕКОВ (АДАПТИРОВАННАЯ ПОД ШИРОКИЙ ЭКРАН) === */
 .track-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
+    /* Карточки заполняют весь экран построчно, оставаясь аккуратного размера (180-240px) */
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 24px;
     margin-top: 30px;
+    width: 100%;
 }
 
 .track-card {
@@ -222,7 +257,7 @@ input:checked + .slider:before {
 .sidebar {
     position: fixed;
     top: 0;
-    left: -300px; /* Спрятана за левый край экрана */
+    left: -300px;
     width: 300px;
     height: 100%;
     background-color: #121212;
@@ -259,7 +294,6 @@ input:checked + .slider:before {
     color: #fff;
 }
 
-/* Профиль юзера внутри сайдбара */
 .user-profile-card {
     text-align: center;
     margin-top: 30px;
@@ -275,6 +309,10 @@ input:checked + .slider:before {
     margin: 0 auto 15px auto;
 }
 
+#sidebarAvatar {
+    border-color: var(--accent) !important;
+}
+
 .user-profile-card h2 {
     color: #fff;
     margin: 0 0 5px 0;
@@ -282,8 +320,9 @@ input:checked + .slider:before {
 }
 
 .role-badge {
-    color: var(--accent);
-    background: rgba(29, 185, 84, 0.1);
+    background-color: var(--accent) !important;
+    background: var(--accent) !important;
+    color: #fff !important;
     padding: 4px 10px;
     border-radius: 12px;
     display: inline-block;
@@ -292,7 +331,6 @@ input:checked + .slider:before {
     font-weight: bold;
 }
 
-/* Интерактивные кнопки сайдбара */
 .btn-sidebar-action {
     width: 100%;
     background: #282828;
@@ -321,7 +359,6 @@ input:checked + .slider:before {
     background: rgba(233, 20, 41, 0.1);
 }
 
-/* Подложка-оверлей фона */
 .sidebar-overlay {
     position: fixed;
     top: 0;
@@ -347,7 +384,7 @@ input:checked + .slider:before {
     background: rgba(18, 18, 18, 0.95);
     backdrop-filter: blur(10px);
     border-top: 1px solid #333;
-    padding: 15px 30px;
+    padding: 15px 40px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -370,13 +407,11 @@ input:checked + .slider:before {
 
 audio {
     width: 40%;
-    filter: invert(1); /* Делает стандартные элементы управления светлыми */
+    filter: invert(1);
 }
 
 
 /* === СТИЛИ ДЛЯ СТРАНИЦЫ АРТИСТА === */
-
-/* Кнопка "Назад" в строгом стиле Spotify */
 .btn-back-custom {
     background: #1a1a1a;
     color: #ffffff;
@@ -388,20 +423,17 @@ audio {
     font-size: 13px;
     transition: all 0.2s ease;
     outline: none;
-    box-shadow: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
 }
 
-/* Эффект наведения для кнопок "Назад" */
 .btn-back-custom:hover {
     border-color: var(--accent);
     color: var(--accent);
-    background-color: rgba(29, 185, 84, 0.05);
+    background-color: rgba(114, 71, 205, 0.05);
 }
 
-/* Варнинг "ЗАПОЛНИ КАРТОЧКУ" */
 .profile-warning {
     background-color: rgba(233, 20, 41, 0.15);
     border: 1px solid #e91429;
@@ -420,24 +452,22 @@ audio {
     100% { opacity: 0.9; }
 }
 
-/* Варнинг успешного сохранения */
 .profile-success {
-    background-color: rgba(29, 185, 84, 0.15);
-    border: 1px solid #1db954;
-    color: #1ed760;
+    background-color: rgba(114, 71, 205, 0.15);
+    border: 1px solid var(--accent-hover);
+    color: var(--accent-hover);
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 20px;
     font-weight: bold;
     text-align: center;
-    box-shadow: 0 4px 12px rgba(29, 185, 84, 0.1);
+    box-shadow: 0 4px 12px rgba(114, 71, 205, 0.1);
 }
 
-/* Геройский баннер артиста */
 .artist-card-hero {
     position: relative;
     border-radius: 15px;
-    overflow: hidden; /* Обрезаем размытые края фоновой картинки */
+    overflow: hidden;
     background: #1e1e1e;
     min-height: 280px;
     display: flex;
@@ -445,9 +475,9 @@ audio {
     padding: 30px;
     box-sizing: border-box;
     box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    width: 100%;
 }
 
-/* ИСПРАВЛЕННЫЙ ЗАБЛЮРЕННЫЙ ЗАДНИЙ ФОН БАННЕРА */
 .artist-hero-bg {
     position: absolute;
     top: 0;
@@ -456,11 +486,8 @@ audio {
     height: 100%;
     background-size: cover;
     background-position: center;
-
-    /* ЖЕСТКИЙ ФИКС БЛЮРА: Размываем фон и чуть-чуть его увеличиваем, чтобы скрыть белые края */
     filter: blur(12px) brightness(0.45);
     transform: scale(1.08);
-
     z-index: 1;
 }
 
@@ -477,7 +504,6 @@ audio {
     .artist-hero-content { flex-direction: column; text-align: center; }
 }
 
-/* Круглая аватарка артиста */
 .artist-avatar-container img {
     width: 150px;
     height: 150px;
@@ -516,14 +542,62 @@ audio {
     margin: 0;
 }
 
-/* Стилизация текстового поля */
-textarea:focus {
-    border-color: var(--accent);
-    outline: none;
+/* === ФИКСЫ ДЛЯ КНОПКИ ПОДПИСКИ И ИНПУТОВ === */
+#artistPublicFollowBtn {
+    background-color: var(--accent) !important;
+    background: var(--accent) !important;
+    color: white !important;
+    border: none !important;
 }
 
+#artistPublicFollowBtn:hover {
+    background-color: var(--accent-hover) !important;
+    background: var(--accent-hover) !important;
+    transform: scale(1.02);
+    transition: all 0.2s ease;
+}
 
-/* === КАСТОМНЫЕ ИНПУТЫ ЗАГРУЗКИ ФАЙЛОВ === */
+.followers-count, .followers-count * {
+    color: var(--accent) !important;
+}
+
+/* Фиксы загрузки файлов */
+.file-input input[type="file"] {
+    color: var(--text-dim) !important;
+}
+
+.file-input input[type="file"]::file-selector-button {
+    background-color: var(--accent) !important;
+    background: var(--accent) !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.file-input input[type="file"]::file-selector-button:hover {
+    background-color: var(--accent-hover) !important;
+    background: var(--accent-hover) !important;
+}
+global-header-right .logo-text:hover {
+    color: var(--accent-hover);
+    transition: color 0.2s ease;
+}
+
+.file-input input:focus {
+    outline: none !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 8px rgba(114, 71, 205, 0.6) !important;
+}
+
+.upload-container .hint {
+    color: var(--accent) !important;
+}
+
+/* Кастомные контейнеры файлов */
 .custom-file-container {
     display: flex;
     align-items: center;
@@ -562,5 +636,5 @@ textarea:focus {
 }
 
 .custom-file-text.file-selected {
-    color: #1ed760;
+    color: var(--accent-hover);
 }

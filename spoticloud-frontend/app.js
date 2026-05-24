@@ -5,6 +5,11 @@ const currentTitle = document.getElementById('currentTrackTitle');
 const playerCover = document.getElementById('playerCover');
 const langSelect = document.getElementById('langSelect');
 
+let currentOpenedArtistId = null;
+let playerState = {
+    queue: [],         // Массив объектов треков, которые сейчас проигрываются
+    currentIndex: -1   // Индекс текущего трека в очереди
+};
 let isLoginMode = false;
 let currentLang = localStorage.getItem('lang') || 'ru';
 
@@ -18,6 +23,9 @@ let artistProfile = JSON.parse(localStorage.getItem('artistProfileData')) || {
 
 const translations = {
     ru: {
+        followersSuffix: "подписчиков",
+        btnFollow: "Подписаться",
+        btnUnfollow: "Вы подписаны",
         successSavedBlock: "Карточка артиста успешно обновлена и сохранена.",
         tabLogin: "Вход",
         tabRegister: "Регистрация",
@@ -37,7 +45,7 @@ const translations = {
         btnToProfile: "Мой профиль артиста",
         statusLoading: "Загрузка музыки...",
         statusSilence: "Пока здесь тишина...",
-
+        artistConsole: "Страница для артистов",
         btnBack: "← Назад",
         consoleHeader: "Консоль артиста",
         uploadTitle: "Добавить новый сингл",
@@ -86,6 +94,10 @@ const translations = {
         alertSaveSuccess: "Профиль артиста успешно сохранен."
     },
     en: {
+    artistConsole: "Artist Console",
+        followersSuffix: "followers",
+        btnFollow: "Follow",
+        btnUnfollow: "Following",
         successSavedBlock: "Artist profile has been successfully updated and saved.",
         tabLogin: "Login",
         tabRegister: "Register",
@@ -200,17 +212,16 @@ async function checkAndRenderArtistProfile() {
 
     if (formBlock) {
         const labels = formBlock.querySelectorAll('label');
-        if (labels && labels.length >= 4) {
+        // Изменили на >= 3, так как поле слушателей удалено из HTML
+        if (labels && labels.length >= 3) {
             labels[0].innerText = dict.labelAvatar;
             labels[1].innerText = dict.labelBg;
-            labels[2].innerText = dict.labelListeners;
-            labels[3].innerText = dict.labelBio;
+            labels[2].innerText = dict.labelBio;
         }
         const saveBtn = formBlock.querySelector('.btn-main');
         if (saveBtn) saveBtn.innerText = dict.btnSaveProfile;
     }
 
-    if (document.getElementById('artistListenersInput')) document.getElementById('artistListenersInput').placeholder = dict.placeholderListeners;
     if (document.getElementById('artistBioInput')) document.getElementById('artistBioInput').placeholder = dict.placeholderBio;
     if (cancelBtn) cancelBtn.innerText = dict.btnCancel;
 
@@ -277,11 +288,21 @@ async function checkAndRenderArtistProfile() {
                 document.getElementById('artistDisplayBio').innerText = profileData.bio || dict.bioEmpty;
             }
 
+            // Ставим аватарку в профиль артиста
             if (document.getElementById('artistDisplayAvatar')) {
                 document.getElementById('artistDisplayAvatar').src = profileData.avatarUrl
                     ? `http://localhost:8081${profileData.avatarUrl}`
                     : 'https://via.placeholder.com/150';
             }
+
+            // === ВОТ СЮДА СЕЛО ОБНОВЛЕНИЕ АВАТАРКИ В САЙДБАРЕ ===
+            if (profileData.avatarUrl) {
+                const sidebarAv = document.getElementById('sidebarAvatar');
+                if (sidebarAv) {
+                    sidebarAv.src = `http://localhost:8081${profileData.avatarUrl}`;
+                }
+            }
+            // ==================================================
 
             // ФОРС БЛЮРА: Сохраняем логику красивого размытия фона
             const heroBg = document.getElementById('artistHeroBg');
@@ -298,19 +319,23 @@ async function checkAndRenderArtistProfile() {
                 }
             }
 
+            const myReleasesSec = document.getElementById('artistMyReleasesSection');
+            if (myReleasesSec) {
+                myReleasesSec.style.display = 'block';
+            }
 
-                    const myReleasesSec = document.getElementById('artistMyReleasesSection');
-                    if (myReleasesSec) {
-                        myReleasesSec.style.display = 'block';
-                    }
+            console.log("Данные профиля с бэка:", profileData); // Чекаем в F12, что вообще прислал сервер
 
+            if (profileData.id) {
+                // 1. Отрисовываем треки артиста в его кабинете
+                fetchArtistTracks(profileData.id, true); // Передаем true, чтобы заливать в 'artistOwnTrackList'
 
-                    console.log("Данные профиля с бэка:", profileData); // Чекаем в F12, что вообще прислал сервер
-                    if (profileData.id) {
-                        fetchArtistTracks(profileData.id, true); // Передаем true, чтобы заливать в 'artistOwnTrackList'
-                    } else {
-                        console.error("Критическая ошибка: Бэкенд не вернул id артиста в объекте профиля!");
-                    }
+                // 2. === ИНТЕГРАЦИЯ ПОДПИСОК ===
+                // Загружаем актуальное число подписчиков для счетчика в личном кабинете артиста
+                loadFollowStatus(profileData.id);
+            } else {
+                console.error("Критическая ошибка: Бэкенд не вернул id артиста в объекте профиля!");
+            }
         }
     } catch (e) {
         console.error("Ошибка при получении профиля:", e);
@@ -425,13 +450,24 @@ async function handleAuthSubmit() {
                     document.getElementById('sidebarRole').innerText = role.includes('ARTIST') ? 'Artist' : 'User';
                 }
 
+                // === ФИКС АВАТАРКИ В САЙДБАРЕ ДЛЯ РАЗНЫХ РОЛЕЙ ===
+                const sidebarAv = document.getElementById('sidebarAvatar');
                 if (role.includes('ARTIST')) {
                     if (document.getElementById('toArtistConsole')) document.getElementById('toArtistConsole').style.display = 'block';
                     if (document.getElementById('toArtistProfile')) document.getElementById('toArtistProfile').style.display = 'block';
+
+                    // Запускаем подгрузку профиля артиста (она сама поставит его аватарку)
+                    checkAndRenderArtistProfile();
                 } else {
                     if (document.getElementById('toArtistConsole')) document.getElementById('toArtistConsole').style.display = 'none';
                     if (document.getElementById('toArtistProfile')) document.getElementById('toArtistProfile').style.display = 'none';
+
+                    // Если зашел обычный юзер — жестко сбрасываем аватарку на дефолт
+                    if (sidebarAv) {
+                        sidebarAv.src = 'https://via.placeholder.com/150/282828/FFFFFF?text=User';
+                    }
                 }
+                // ===============================================
 
                 showView('main-page');
                 fetchTracks();
@@ -481,32 +517,63 @@ async function handleRegister() {
 }
 
 function showView(viewId) {
+    // 1. Скрываем все секции
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
 
     const targetView = document.getElementById(viewId);
     if (targetView) targetView.style.display = 'block';
 
+    // 2. Управляем плеером
     const playerBar = document.getElementById('player-bar');
     if (playerBar) {
         playerBar.style.display = (viewId === 'auth-page') ? 'none' : 'flex';
     }
 
-    if (viewId === 'main-page') {
-            fetchTracks();
-        }
+    // 3. Управляем шапкой
+    const appNavbar = document.getElementById('app-navigation-bar');
+    if (appNavbar) {
+        appNavbar.style.display = (viewId === 'auth-page') ? 'none' : 'flex';
+    }
 
+    const mainTitle = document.getElementById('mainHeaderTitle');
+    const searchContainer = document.getElementById('searchBarContainer');
+
+    // 4. МЕНЯЕМ КЛЮЧИ ПЕРЕВОДА ДЛЯ ЗАГОЛОВКА
+    if (viewId === 'main-page') {
+        if (mainTitle) mainTitle.setAttribute('data-translate', 'mainHeader');
+        if (searchContainer) searchContainer.style.display = 'flex';
+        fetchTracks();
+    } else {
+        if (searchContainer) searchContainer.style.display = 'none';
+
+        if (mainTitle) {
+            if (viewId === 'artist-page') {
+                mainTitle.setAttribute('data-translate', 'artistConsole');
+            } else if (viewId === 'artist-profile-page') {
+                mainTitle.setAttribute('data-translate', 'artistProfile');
+            } else if (viewId === 'artist-public-page') {
+                mainTitle.setAttribute('data-translate', 'publicProfile');
+            }
+        }
+    }
+
+    // Принудительно вызываем перевод, чтобы он обновил заголовок по новому ключу
+    if (typeof changeLanguage === 'function') {
+        changeLanguage(currentLang || 'ru');
+    }
+
+    // 5. Твои специфичные хуки
     if (viewId === 'artist-profile-page') {
         checkAndRenderArtistProfile();
-    }
-    if (viewId === 'artist-console-page') {
-        changeLanguage(currentLang);
     }
 }
 
 function toggleArtistInput() {
     const isArtistCheck = document.getElementById('isArtistCheck');
     const artistField = document.getElementById('artistNameField');
+
     if (isArtistCheck && artistField) {
+        // Просто переключаем дефолтный display, без всякого бреда с setProperty
         artistField.style.display = isArtistCheck.checked ? 'block' : 'none';
     }
 }
@@ -642,33 +709,44 @@ function renderTracks(tracks) {
         return;
     }
 
-    tracks.forEach(track => {
-        const card = document.createElement('div');
-        card.className = 'track-card';
-
+    // ПОДГОТОВКА ОЧЕРЕДИ: Точно так же маппим общий массив треков под нужды плеера
+    const mappedTracks = tracks.map(track => {
+        let audioName = track.audioUrl ? track.audioUrl.split('\\').pop().split('/').pop() : '';
         let coverName = track.coverUrl ? track.coverUrl.split('\\').pop().split('/').pop() : null;
         const coverImg = coverName ? `http://localhost:8081/media/covers/${coverName}` : 'https://via.placeholder.com/200/282828/FFFFFF?text=Music';
 
         let cleanTitle = track.title || 'Без названия';
         if (cleanTitle.includes(' - ')) cleanTitle = cleanTitle.split(' - ').pop();
 
+        return {
+            ...track,
+            url: audioName,
+            coverUrl: coverImg,
+            title: cleanTitle
+        };
+    });
+
+    mappedTracks.forEach((track, index) => {
+        const card = document.createElement('div');
+        card.className = 'track-card';
+
         card.innerHTML = `
-            <img src="${coverImg}" alt="cover" onerror="this.src='https://via.placeholder.com/200/282828/FFFFFF?text=No+Cover'">
+            <img src="${track.coverUrl}" alt="cover" onerror="this.src='https://via.placeholder.com/200/282828/FFFFFF?text=No+Cover'">
             <div class="card-info" style="display: flex; flex-direction: column; gap: 4px; padding: 10px 0;">
-                <strong class="track-title" style="display: block; font-size: 16px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${cleanTitle}</strong>
+                <strong class="track-title" style="display: block; font-size: 16px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${track.title}</strong>
                 <span class="artist-link" style="color: #b3b3b3; font-size: 14px; cursor: pointer; display: inline-block; width: fit-content; transition: color 0.2s;">${track.artistName || 'Unknown Artist'}</span>
             </div>
         `;
 
-        let audioName = track.audioUrl ? track.audioUrl.split('\\').pop().split('/').pop() : '';
-        card.onclick = () => playTrack(audioName, cleanTitle, coverImg, track.artistName, track.artistId);
+        // НАЖАТИЕ: Заряжаем в плеер всю главную страницу как очередь + индекс трека
+        card.onclick = () => setQueueAndPlay(mappedTracks, index);
 
         const artistBtn = card.querySelector('.artist-link');
         if (artistBtn) {
             artistBtn.onmouseenter = () => { artistBtn.style.color = '#1db954'; artistBtn.style.textDecoration = 'underline'; };
             artistBtn.onmouseleave = () => { artistBtn.style.color = '#b3b3b3'; artistBtn.style.textDecoration = 'none'; };
             artistBtn.onclick = (event) => {
-                event.stopPropagation();
+                event.stopPropagation(); // Чтобы клик по автору не запускал сам трек
                 goToPublicArtistPage(track.artistId, track.artistName);
             };
         }
@@ -676,24 +754,42 @@ function renderTracks(tracks) {
     });
 }
 
-function playTrack(url, title, cover, artistName, artistId) {
-    if (!url) return alert(translations[currentLang].alertNoAudio);
-    if (!mainAudio) return;
+// 1. Главная функция: принимает массив треков, индекс старта и включает музыку
+function setQueueAndPlay(tracksArray, startIndex) {
+    if (!tracksArray || tracksArray.length === 0) return;
 
-    // Назначаем источник трека и запускаем его
-    mainAudio.src = `http://localhost:8081/media/tracks/${url}`;
+    playerState.queue = tracksArray;
+    playerState.currentIndex = startIndex;
+
+    playCurrentTrack();
+}
+
+// 2. Внутренняя функция, которая заряжает в тег <audio> трек по текущему индексу
+function playCurrentTrack() {
+    if (playerState.queue.length === 0 || playerState.currentIndex === -1) return;
+
+    const track = playerState.queue[playerState.currentIndex];
+    const mainAudio = document.getElementById('mainAudio');
+    if (!mainAudio || !track) return;
+
+    // Считаем правильный URL трека (подставь свой путь к эндпоинту медиа, если он другой)
+    mainAudio.src = `http://localhost:8081/media/tracks/${track.url}`;
+
+    // Выкатываем плеер-бар
+    const playerBar = document.getElementById('player-bar');
+    if (playerBar) playerBar.style.display = 'flex';
+
+    // Запускаем плеер и шлем стрим на бэк
     mainAudio.play()
         .then(() => {
-            // АВТОМАТИЧЕСКИЙ ТРИГГЕР СТРИМА
+            // === ТВОЙ РАБОЧИЙ КОД ОТПРАВКИ СТРИМА НА БЭК (БЕЗ ИЗМЕНЕНИЙ) ===
             const currentUsername = localStorage.getItem('username');
-
-            // Если юзер авторизован и у трека есть artistId — шлем запрос на бэк
-            if (currentUsername && artistId) {
+            if (currentUsername && track.artistId) {
                 const streamData = new FormData();
-                streamData.append('artistId', artistId);
+                streamData.append('artistId', track.artistId);
                 streamData.append('username', currentUsername);
 
-                console.log(`Отправляем стрим: артист ${artistId}, слушает ${currentUsername}`);
+                console.log(`Отправляем стрим: артист ${track.artistId}, слушает ${currentUsername}`);
 
                 fetch('http://localhost:8081/api/v1/artist/profile/stream', {
                     method: 'POST',
@@ -705,25 +801,65 @@ function playTrack(url, title, cover, artistName, artistId) {
                 })
                 .catch(err => console.error("Ошибка сети при отправке стрима:", err));
             }
+            // ==============================================================
         })
-        .catch(e => console.error("Ошибка воспроизведения трека:", e));
+        .catch(e => console.error("Ошибка воспроизведения:", e));
 
-    // Обновляем плеер-бар (название и обложку)
-    if (currentTitle) currentTitle.innerText = title;
-    if (playerCover) playerCover.src = cover;
+    // Обновляем текст и обложку в плеере
+    if (document.getElementById('currentTrackTitle')) document.getElementById('currentTrackTitle').innerText = track.title;
 
-    // Делаем имя артиста в плеере кликабельным, чтобы можно было перейти на его страницу
+    // Обновляем текст и обложку в плеере
+        if (document.getElementById('currentTrackTitle')) document.getElementById('currentTrackTitle').innerText = track.title;
+
+
+        if (document.getElementById('playerCover')) {
+            // Просто берем готовую ссылку, без повторного приклеивания хоста
+            document.getElementById('playerCover').src = track.coverUrl ? track.coverUrl : 'https://via.placeholder.com/150';
+        }
+
+    // Делаем имя артиста кликабельным (переход в публичный профиль)
     const playerArtistContainer = document.getElementById('currentTrackArtist');
     if (playerArtistContainer) {
-        playerArtistContainer.innerHTML = `<span class="player-artist-link" style="color: #b3b3b3; cursor: pointer; font-size: 14px; transition: color 0.2s;">${artistName || 'Unknown Artist'}</span>`;
+        playerArtistContainer.innerHTML = `<span class="player-artist-link" style="color: #b3b3b3; cursor: pointer; font-size: 14px; transition: color 0.2s;">${track.artistName || 'Unknown Artist'}</span>`;
         const playerArtistLink = playerArtistContainer.querySelector('.player-artist-link');
         if (playerArtistLink) {
             playerArtistLink.onmouseenter = () => { playerArtistLink.style.color = '#1db954'; playerArtistLink.style.textDecoration = 'underline'; };
             playerArtistLink.onmouseleave = () => { playerArtistLink.style.color = '#b3b3b3'; playerArtistLink.style.textDecoration = 'none'; };
-            playerArtistLink.onclick = () => goToPublicArtistPage(artistId, artistName);
+            playerArtistLink.onclick = () => goToPublicArtistPage(track.artistId, track.artistName);
         }
     }
 }
+
+// 3. Функция кнопки «Вперед»
+function playNextTrack() {
+    if (playerState.queue.length === 0) return;
+
+    // Идем к следующему треку. Если это был последний — прыгаем в начало (на 0)
+    playerState.currentIndex = (playerState.currentIndex + 1) % playerState.queue.length;
+    console.log(`Переключаю вперед на индекс: ${playerState.currentIndex}`);
+    playCurrentTrack();
+}
+
+// 4. Функция кнопки «Назад»
+function playPreviousTrack() {
+    if (playerState.queue.length === 0) return;
+
+    // Идем назад. Если вылетели за ноль — кидаем на самый последний трек в массиве
+    playerState.currentIndex = (playerState.currentIndex - 1 + playerState.queue.length) % playerState.queue.length;
+    console.log(`Переключаю назад на индекс: ${playerState.currentIndex}`);
+    playCurrentTrack();
+}
+
+// 5. АВТОПЕРЕКЛЮЧЕНИЕ: Когда песня закончилась, плеер сам включает следующую
+document.addEventListener('DOMContentLoaded', () => {
+    const audioEl = document.getElementById('mainAudio');
+    if (audioEl) {
+        audioEl.addEventListener('ended', () => {
+            console.log("Трек доиграл до конца. Включаю следующий автоматический...");
+            playNextTrack();
+        });
+    }
+});
 
 
 async function goToPublicArtistPage(artistId, artistName) {
@@ -790,8 +926,12 @@ async function goToPublicArtistPage(artistId, artistName) {
         console.error("Ошибка при подтягивании публичного профиля:", e);
     }
 
-    // Запускаем загрузку треков. Передаем false, чтобы они отрендерились в 'artistPublicTrackList'
+    // 1. Запускаем загрузку треков. Передаем false, чтобы они отрендерились в 'artistPublicTrackList'
     fetchArtistTracks(artistId, false);
+
+    // 2. === ИНТЕГРАЦИЯ ПОДПИСОК ===
+    currentOpenedArtistId = artistId; // Запоминаем, кого открыли, для функции handleFollowToggle()
+    loadFollowStatus(artistId);       // Подгружаем актуальное количество подписчиков и настраиваем кнопку
 }
 
 async function fetchArtistTracks(artistId, isOwnProfile = false) {
@@ -820,27 +960,38 @@ async function fetchArtistTracks(artistId, isOwnProfile = false) {
             return;
         }
 
-        tracks.forEach(track => {
-            console.log("Рендерим карточку для трека:", track.title);
-            const card = document.createElement('div');
-            card.className = 'track-card';
-
+        // ПОДГОТОВКА ОЧЕРЕДИ: Маппим оригинальный массив с бэка под формат нашего плеера playerState
+        const mappedTracks = tracks.map(track => {
+            let audioName = track.audioUrl ? track.audioUrl.split('\\').pop().split('/').pop() : '';
             let coverName = track.coverUrl ? track.coverUrl.split('\\').pop().split('/').pop() : null;
             const coverImg = coverName ? `http://localhost:8081/media/covers/${coverName}` : 'https://via.placeholder.com/200/282828/FFFFFF?text=Music';
 
             let cleanTitle = track.title || 'Без названия';
             if (cleanTitle.includes(' - ')) cleanTitle = cleanTitle.split(' - ').pop();
 
+            return {
+                ...track,
+                url: audioName,         // Плеер будет брать файл отсюда
+                coverUrl: coverImg,     // Плеер будет брать обложку отсюда
+                title: cleanTitle       // Очищенное имя без дублирования артиста
+            };
+        });
+
+        mappedTracks.forEach((track, index) => {
+            console.log("Рендерим карточку для трека:", track.title);
+            const card = document.createElement('div');
+            card.className = 'track-card';
+
             card.innerHTML = `
-                <img src="${coverImg}" alt="cover" onerror="this.src='https://via.placeholder.com/200/282828/FFFFFF?text=No+Cover'">
+                <img src="${track.coverUrl}" alt="cover" onerror="this.src='https://via.placeholder.com/200/282828/FFFFFF?text=No+Cover'">
                 <div class="card-info" style="display: flex; flex-direction: column; gap: 4px; padding: 10px 0;">
-                    <strong class="track-title" style="display: block; font-size: 16px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${cleanTitle}</strong>
+                    <strong class="track-title" style="display: block; font-size: 16px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${track.title}</strong>
                     <span style="color: #b3b3b3; font-size: 14px;">${track.artistName}</span>
                 </div>
             `;
 
-            let audioName = track.audioUrl ? track.audioUrl.split('\\').pop().split('/').pop() : '';
-            card.onclick = () => playTrack(audioName, cleanTitle, coverImg, track.artistName, track.artistId);
+            // НАЖАТИЕ: передаем весь подготовленный массив страницы и текущий ИНДЕКС в очереди
+            card.onclick = () => setQueueAndPlay(mappedTracks, index);
 
             artistTrackList.appendChild(card);
         });
@@ -918,31 +1069,114 @@ function handleLogout() {
     showView('auth-page');
 }
 
+// Функция загрузки количества подписчиков и состояния кнопки
+async function loadFollowStatus(artistId) {
+    const currentUsername = localStorage.getItem('username');
+    const savedRole = localStorage.getItem('role');
+
+    const followBtn = document.getElementById('artistPublicFollowBtn');
+    const followersTextPublic = document.getElementById('artistPublicDisplayFollowers');
+    const followersTextOwn = document.getElementById('artistDisplayFollowers');
+
+    if (!artistId) return;
+
+    try {
+        // Делаем запрос к бэку за статусом подписки и количеством фолловеров
+        const res = await fetch(`http://localhost:8081/api/v1/artist/profile/${artistId}/follow-status?username=${currentUsername || ''}`);
+        if (res.ok) {
+            const data = await res.json();
+
+            // 1. Обновляем цифры в счетчиках на страницах
+            if (followersTextPublic) followersTextPublic.innerText = data.followersCount;
+            if (followersTextOwn) followersTextOwn.innerText = data.followersCount;
+
+            // 2. Настраиваем отображение кнопки подписки
+            if (followBtn) {
+                const sidebarUsernameElem = document.getElementById('sidebarUsername');
+                const publicArtistNameElem = document.getElementById('artistPublicDisplayName');
+
+                const sidebarUser = sidebarUsernameElem ? sidebarUsernameElem.innerText.trim() : "";
+                const publicArtist = publicArtistNameElem ? publicArtistNameElem.innerText.trim() : "";
+
+                // Проверяем: если залогиненный юзер — это тот же самый артист, чей профиль мы смотрим, то скрываем кнопку
+                if (savedRole === 'ARTIST' && sidebarUser === publicArtist && sidebarUser !== "") {
+                    followBtn.style.display = 'none';
+                } else {
+                    // Во всех остальных случаях (обычный юзер, гость или другой артист) — ЖЕСТКО показываем её
+                    followBtn.style.setProperty('display', 'inline-block', 'important');
+                    followBtn.style.display = 'inline-block';
+
+                    // Выставляем правильные переводы и стили в зависимости от data.isSubscribed
+                    const dict = translations[currentLang] || translations['ru'];
+
+                    if (data.isSubscribed) {
+                        followBtn.innerText = dict.btnUnfollow || "Вы подписаны";
+                        followBtn.style.background = '#282828';
+                        followBtn.style.border = '1px solid #535353';
+                        followBtn.style.color = '#fff';
+                    } else {
+                        followBtn.innerText = dict.btnFollow || "Подписаться";
+                        followBtn.style.background = '#1db954';
+                        followBtn.style.border = 'none';
+                        followBtn.style.color = '#fff';
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        console.error("Ошибка при получении статуса подписки или настройке кнопки:", e);
+    }
+}
+
+// Обработчик клика по кнопке подписки
+async function handleFollowToggle() {
+    const currentUsername = localStorage.getItem('username');
+    if (!currentUsername) return alert("Войдите в аккаунт, чтобы подписываться на исполнителей!");
+    if (!currentOpenedArtistId) return;
+
+    try {
+        const res = await fetch(`http://localhost:8081/api/v1/artist/profile/${currentOpenedArtistId}/follow?username=${currentUsername}`, {
+            method: 'POST'
+        });
+
+        if (res.ok) {
+            // Мгновенно обновляем цифру счетчика и кнопку на экране
+            await loadFollowStatus(currentOpenedArtistId);
+        } else {
+            console.error("Не удалось изменить состояние подписки");
+        }
+    } catch (e) {
+        console.error("Ошибка при отправке запроса подписки:", e);
+    }
+}
+
+function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('authPassword');
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+        if (passwordInput && toggleBtn) {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.innerHTML = `
+                    <svg id="eyeIcon" viewBox="0 0 24 24" width="20" height="20" stroke="#888" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                `;
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.innerHTML = `
+                    <svg id="eyeIcon" viewBox="0 0 24 24" width="20" height="20" stroke="#888" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                `;
+            }
+        }
+    }
+
+
 window.onload = () => {
     showView('auth-page');
     changeLanguage(currentLang);
 };
 
-function togglePasswordVisibility() {
-    const passwordInput = document.getElementById('authPassword');
-    const toggleBtn = document.getElementById('togglePasswordBtn');
-    if (passwordInput && toggleBtn) {
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            toggleBtn.innerHTML = `
-                <svg id="eyeIcon" viewBox="0 0 24 24" width="20" height="20" stroke="#888" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                    <line x1="1" y1="1" x2="23" y2="23"></line>
-                </svg>
-            `;
-        } else {
-            passwordInput.type = 'password';
-            toggleBtn.innerHTML = `
-                <svg id="eyeIcon" viewBox="0 0 24 24" width="20" height="20" stroke="#888" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-            `;
-        }
-    }
-}

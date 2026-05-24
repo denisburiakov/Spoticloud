@@ -3,28 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpotiCloud | Student Edition</title>
+    <title>SpotiCloud</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container" style="position: relative;">
 
-    <div class="global-lang-selector" style="position: absolute; top: 15px; right: 15px; z-index: 9999;">
-        <select id="langSelect" onchange="changeLanguage(this.value)" style="background: #282828; color: #fff; border: 1px solid #404040; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; outline: none;">
-            <option value="ru">🇷🇺 RU</option>
-            <option value="en">🇺🇸 EN</option>
-        </select>
-    </div>
+    <header id="app-navigation-bar" style="display: none; justify-content: space-between; align-items: center; width: 100%; padding: 15px 0; margin-bottom: 25px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); box-sizing: border-box;">
 
+        <div class="nav-left-group" style="display: flex; align-items: center; gap: 20px; flex: 1;">
+            <button id="sidebarToggleBtn" onclick="toggleSidebar(true)" style="background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; padding: 0; line-height: 1;">☰</button>
+            <h1 id="mainHeaderTitle" data-translate="mainHeader" style="margin: 0; font-size: 28px; font-weight: 700; white-space: nowrap;">Главная</h1>
+        </div>
+
+        <div id="searchBarContainer" style="display: flex; flex: 1; justify-content: center; align-items: center;">
+            <input type="text" id="searchInput" placeholder="Поиск любимых треков..." data-placeholder="placeholderSearch" style="margin-bottom: 0; width: 100%; max-width: 350px; padding: 8px 16px; background: #2a2a2a; border: 1px solid transparent; border-radius: 20px; color: white; box-sizing: border-box; outline: none; font-size: 14px;">
+        </div>
+
+        <div class="nav-right-group" style="display: flex; align-items: center; flex: 1; justify-content: flex-end;">
+            <span onclick="showView('main-page')" class="logo-text" style="font-size: 2.5rem; margin-bottom: 0; cursor: pointer; user-select: none; transition: opacity 0.2s ease;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">SpotiCloud</span>
+        </div>
+
+    </header>
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
             <h3 data-translate="sidebarTitle">Профиль</h3>
             <button onclick="toggleSidebar(false)" class="btn-close-sidebar">×</button>
         </div>
         <div class="sidebar-content">
-            <div class="user-profile-card">
-                <div class="avatar-placeholder">👤</div>
-                <h2 id="sidebarUsername">Username</h2>
+            <div class="user-profile-card" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 0;">
+                <img id="sidebarAvatar" src="https://via.placeholder.com/150/282828/FFFFFF?text=User" alt="Avatar"
+                     style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #1db954;">
+
+                <h2 id="sidebarUsername" style="margin: 5px 0 0 0; color: #fff;">Username</h2>
                 <p id="sidebarRole" class="role-badge">User</p>
             </div>
 
@@ -39,6 +50,16 @@
     <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar(false)"></div>
 
     <section id="auth-page" class="view">
+
+        <div id="auth-lang-wrapper" style="position: absolute; top: 20px; right: 25px; z-index: 9999;">
+            <div class="global-lang-selector">
+                <select id="langSelect" onchange="changeLanguage(this.value)" style="background: #282828; color: #fff; border: 1px solid #404040; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 14px; outline: none; font-weight: 600;">
+                    <option value="ru">🇷🇺 RU</option>
+                    <option value="en">🇺🇸 EN</option>
+                </select>
+            </div>
+        </div>
+
         <div class="auth-box" style="padding-top: 50px;">
             <h1 class="logo-text">SpotiCloud</h1>
 
@@ -77,30 +98,14 @@
             </div>
         </div>
     </section>
-
     <section id="main-page" class="view" style="display:none;">
-        <header class="main-header">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <button onclick="toggleSidebar(true)" style="background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; padding: 0; line-height: 1;">☰</button>
-                <h1 data-translate="mainHeader">Главная</h1>
-            </div>
-            <div class="header-actions">
-                <input type="text" id="searchInput" placeholder="Поиск любимых треков..." data-placeholder="placeholderSearch">
-            </div>
-        </header>
-
         <div id="trackList" class="track-grid">
             <p class="status-msg" data-translate="statusLoading">Загрузка музыки...</p>
         </div>
     </section>
 
     <section id="artist-page" class="view" style="display:none;">
-        <header class="sub-header" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-            <button onclick="showView('main-page')" class="btn-back-custom" data-translate="btnBack">← Назад</button>
-            <h2 data-translate="consoleHeader" style="margin: 0;">Консоль артиста</h2>
-        </header>
-
-        <div class="upload-container">
+        <div class="upload-container" style="margin-top: 10px;">
             <h3 data-translate="uploadTitle">Добавить новый сингл</h3>
             <div class="upload-form">
                 <div class="file-input">
@@ -118,12 +123,7 @@
     </section>
 
     <section id="artist-public-page" class="view" style="display:none;">
-        <header class="sub-header" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-            <button onclick="showView('main-page')" class="btn-back-custom" data-translate="profileBackBtn">← Назад на Главную</button>
-            <p style="color: #b3b3b3; margin: 0; font-size: 14px;" data-translate="profileSubTitle">Официальный профиль исполнителя</p>
-        </header>
-
-        <div class="artist-card-hero" style="position: relative; border-radius: 12px; overflow: hidden; background: #282828; min-height: 280px; display: flex; flex-direction: column; justify-content: flex-end;">
+        <div class="artist-card-hero" style="position: relative; border-radius: 12px; overflow: hidden; background: #282828; min-height: 280px; display: flex; flex-direction: column; justify-content: flex-end; margin-top: 10px;">
             <div class="artist-hero-bg" id="artistPublicHeroBg" style="position: absolute; top:0; left:0; width:100%; height:100%; background-size: cover; background-position: center; z-index: 1;"></div>
 
             <div class="artist-hero-content" style="position: relative; z-index: 2; padding: 30px; display: flex; align-items: center; gap: 25px; flex-wrap: wrap;">
@@ -133,7 +133,14 @@
                 <div class="artist-hero-text" style="flex: 1; color: white;">
                     <h1 id="artistPublicDisplayName" style="font-size: 42px; margin: 0 0 10px 0; font-weight: 800;">Имя Артиста</h1>
                     <p class="listeners-count" style="margin: 0 0 10px 0; font-size: 16px; color: #e0e0e0; font-weight: 600;"><span id="artistPublicDisplayListeners">0</span> <span data-translate="listenersSuffix">слушателей за месяц</span></p>
-                    <p id="artistPublicDisplayBio" class="artist-bio-text" style="margin: 0; color: #b3b3b3; max-width: 600px; line-height: 1.5; font-size: 14px;">Биография...</p>
+                    <p class="followers-count" style="margin: 5px 0 15px 0; font-size: 14px; color: #1db954; font-weight: 600;">
+                        <span id="artistPublicDisplayFollowers">0</span> <span data-translate="followersSuffix">подписчиков</span></p>
+
+                    <button id="artistPublicFollowBtn" onclick="handleFollowToggle()" class="btn-main" style="width: auto; padding: 8px 20px; font-size: 14px; border-radius: 20px; cursor: pointer; font-weight: bold; background: #8a55ec; color: white; border: none; display: inline-block;">
+                        Подписаться
+                    </button>
+
+                    <p id="artistPublicDisplayBio" class="artist-bio-text" style="margin: 15px 0 0 0; color: #b3b3b3; max-width: 600px; line-height: 1.5; font-size: 14px;">Биография...</p>
                 </div>
             </div>
         </div>
@@ -144,20 +151,15 @@
     </section>
 
     <section id="artist-profile-page" class="view" style="display:none;">
-        <header class="sub-header" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-            <button onclick="showView('main-page')" class="btn-back-custom" data-translate="btnBack">← Назад</button>
-            <h2 data-translate="artistProfileTitle" style="margin: 0;">Профиль артиста</h2>
-        </header>
-
-        <div id="artist-profile-warning" class="profile-warning" style="display: none;">
+        <div id="artist-profile-warning" class="profile-warning" style="display: none; margin-top: 10px;">
             Заполните карточку артиста!
         </div>
 
-        <div id="artist-profile-success" class="profile-success" style="display: none; background: #1db954; color: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-weight: 600;">
+        <div id="artist-profile-success" class="profile-success" style="display: none; background: #1db954; color: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-weight: 600; margin-top: 10px;">
             Карточка артиста успешно обновлена и сохранена.
         </div>
 
-        <div id="artist-profile-display" class="artist-card-hero" style="display: none; position: relative; border-radius: 12px; overflow: hidden; background: #282828; min-height: 280px; flex-direction: column; justify-content: flex-end;">
+        <div id="artist-profile-display" class="artist-card-hero" style="display: none; position: relative; border-radius: 12px; overflow: hidden; background: #282828; min-height: 280px; flex-direction: column; justify-content: flex-end; margin-top: 10px;">
             <div class="artist-hero-bg" id="artistHeroBg" style="position: absolute; top:0; left:0; width:100%; height:100%; background-size: cover; background-position: center; z-index: 1; filter: brightness(0.6);"></div>
 
             <div class="artist-hero-content" style="position: relative; z-index: 2; padding: 30px; display: flex; align-items: center; gap: 25px; flex-wrap: wrap;">
@@ -167,8 +169,14 @@
                 <div class="artist-hero-text" style="flex: 1; color: white;">
                     <span class="verified-badge" style="background: #007eed; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: none; margin-bottom: 8px;">✓ Подтвержденный артист</span>
                     <h1 id="artistDisplayName" style="font-size: 42px; margin: 0 0 10px 0; font-weight: 800;">Имя Артиста</h1>
-                    <p class="listeners-count" style="margin: 0 0 10px 0; font-size: 16px; color: #e0e0e0; font-weight: 600;"><span id="artistDisplayListeners">0</span> <span data-translate="listenersSuffix">слушателей за месяц</span></p>
-                    <p id="artistDisplayBio" class="artist-bio-text" style="margin: 0; color: #b3b3b3; max-width: 600px; line-height: 1.5; font-size: 14px;">Здесь будет твое описание...</p>
+
+                    <p class="listeners-count" style="margin: 0; font-size: 16px; color: #e0e0e0; font-weight: 600;">
+                        <span id="artistDisplayListeners">0</span> <span data-translate="listenersSuffix">слушателей за месяц</span>
+                    </p>
+                    <p class="followers-count" style="margin: 5px 0 0 0; font-size: 14px; color: #1db954; font-weight: 600;">
+                        <span id="artistDisplayFollowers">0</span> <span data-translate="followersSuffix">подписчиков</span>
+                    </p>
+                    <p id="artistDisplayBio" class="artist-bio-text" style="margin: 15px 0 0 0; color: #b3b3b3; max-width: 600px; line-height: 1.5; font-size: 14px;">Здесь будет твое описание...</p>
                     <button onclick="openArtistEditor()" class="btn-outline" style="margin-top: 15px; padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 20px; border: 1px solid #b3b3b3; background: transparent; color: white; cursor: pointer; transition: all 0.2s;">Редактировать профиль</button>
                 </div>
             </div>
@@ -186,7 +194,7 @@
                     <input type="file" id="artistBgFile" accept="image/*">
                 </div>
                 <div style="margin-bottom: 15px;">
-                    <label style="display:block; margin-bottom: 5px; color: #b3b3b3; font-size: 14px;">Описание артиста (Биография):</label>
+                    <label>Описание артиста (Биография):</label>
                     <textarea id="artistBioInput" rows="4" placeholder="Расскажи свою историю, добавь ссылки на соцсети..." style="width:100%; background:#2a2a2a; border:1px solid transparent; border-radius:8px; color:white; padding:12px; box-sizing:border-box; font-family:inherit; resize:vertical; outline: none;"></textarea>
                 </div>
                 <div style="display: flex; gap: 10px;">
@@ -212,7 +220,21 @@
             <div id="currentTrackArtist" style="font-size: 0.8rem; color: #b3b3b3;" data-translate="playerDefaultArtist">Исполнитель</div>
         </div>
     </div>
-    <audio id="mainAudio" controls></audio>
+
+    <div class="player-controls-wrapper" style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 40%;">
+        <div class="control-buttons" style="display: flex; align-items: center; gap: 20px; width: 100%; justify-content: center;">
+            <button id="prevTrackBtn" onclick="playPreviousTrack()" style="background: none; border: none; color: #b3b3b3; font-size: 22px; cursor: pointer; transition: color 0.2s; outline: none;">
+                ⏮
+            </button>
+
+            <audio id="mainAudio" controls style="width: 100%; max-width: 400px;"></audio>
+
+            <button id="nextTrackBtn" onclick="playNextTrack()" style="background: none; border: none; color: #b3b3b3; font-size: 22px; cursor: pointer; transition: color 0.2s; outline: none;">
+                ⏭
+            </button>
+        </div>
+    </div>
+
     <div style="width: 30%;"></div>
 </footer>
 
