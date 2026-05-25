@@ -41,6 +41,11 @@
 
             <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
 
+            <button onclick="showView('user-profile-page'); loadUserProfile(); toggleSidebar(false);"
+                    class="btn-sidebar-action" data-translate="btnUserSettings">
+                Настройки профиля
+            </button>
+
             <button id="toArtistConsole" class="btn-sidebar-action" style="display:none;" onclick="showView('artist-page'); toggleSidebar(false);" data-translate="btnToConsole">Для артистов</button>
             <button id="toArtistProfile" class="btn-sidebar-action" style="display:none;" onclick="showView('artist-profile-page'); toggleSidebar(false);">Мой профиль артиста</button>
 
@@ -207,6 +212,40 @@
         <div id="artistMyReleasesSection" style="display: none; margin-top: 30px;">
             <h3 style="color: #fff; margin-bottom: 15px; font-size: 22px;" data-translate="profileReleases">Все релизы</h3>
             <div id="artistOwnTrackList" class="track-grid">
+            </div>
+        </div>
+    </section>
+
+    <section id="user-profile-page" class="view" style="display:none; margin-top: 10px;">
+        <div id="user-profile-display" style="position: relative; border-radius: 12px; overflow: hidden; background: #282828; padding: 30px; display: flex; align-items: center; gap: 25px; flex-wrap: wrap;">
+            <div style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); background: #181818;">
+                <img id="userDisplayAvatar" src="https://via.placeholder.com/150" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div style="flex: 1; color: white;">
+                <h1 id="userDisplayName" style="font-size: 36px; margin: 0 0 10px 0; font-weight: 800;">Username</h1>
+                <p id="userDisplayBio" data-translate="userBioPlaceholder" style="margin: 0 0 20px 0; color: #b3b3b3; max-width: 500px; font-size: 14px;">
+                    Здесь будет описание вашего профиля...
+                </p>
+                <button  onclick="toggleUserEditor(true)" class="btn-outline" data-translate="userProfileTitle" style="padding: 8px 20px; border-radius: 20px; border: 1px solid #b3b3b3; background: transparent; color: white; cursor: pointer;">
+                    Редактировать профиль
+                </button>
+            </div>
+        </div>
+
+        <div id="user-profile-form" class="upload-container" style="margin-top: 20px; display: none;">
+            <div class="upload-form">
+                <div class="file-input">
+                    <label data-translate="userAvatarLabel">Сменить аватар:</label>
+                    <input type="file" id="userAvatarFile" accept="image/*">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label data-translate="userBioLabel">О себе:</label>
+                    <textarea id="userBioInput" rows="4" data-placeholder="userBioPlaceholder" placeholder="Здесь будет описание вашего профиля" style="width:100%; background:#2a2a2a; border:none; border-radius:8px; color:white; padding:12px; box-sizing:border-box; outline:none;"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="saveUserProfile()" class="btn-main" data-translate="userSaveBtn" style="padding: 10px 20px;">Сохранить</button>
+                    <button onclick="toggleUserEditor(false)" class="btn-outline" data-translate="userCancelBtn" style="padding: 10px 20px; border-radius: 20px;">Отмена</button>
+                </div>
             </div>
         </div>
     </section>

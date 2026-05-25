@@ -23,6 +23,9 @@ public class User implements UserDetails { // Добавили интерфей�
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private UserProfile userProfile;
+
     @Column(unique = true, nullable = false)
     private String username;
 

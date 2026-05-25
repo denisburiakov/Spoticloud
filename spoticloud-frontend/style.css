@@ -1,640 +1,640 @@
 :root {
-    --bg-dark: #121212;
-    --bg-card: #1e1e1e;
-    --accent: #7247cd; /* Тот самый приятный фиолетовый */
-    --accent-hover: #8a55ec; /* Светлый фиолетовый для ховеров */
-    --text-main: #ffffff;
-    --text-dim: #b3b3b3;
-    --glass: rgba(255, 255, 255, 0.05);
-}
-
-/* === БАЗОВЫЕ СТИЛИ === */
-body {
-    margin: 0;
-    font-family: 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #121212 0%, #000000 100%);
-    color: var(--text-main);
-    min-height: 100vh;
-}
-
-/* Полный Full-width режим: сайт тянется на весь экран с красивыми отступами */
-.container {
-    max-width: 100% !important;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 30px 40px;
-    padding-bottom: 120px; /* Чтобы плеер внизу не перекрывал карточки */
-}
-
-/* Обертка для шапки, раскидывает элементы строго по углам экрана */
-.header-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start; /* Выравнивание по верхнему краю */
-    width: 100%;
-    margin-bottom: 30px;
-}
-
-/* Левая секция шапки (кнопка меню, смена языка и т.д.) */
-.header-left {
-    display: flex;
-    flex-direction: column;
-    gap: 12px; /* Расстояние между кнопкой меню и переключателем языка */
-    align-items: flex-start;
-}
-
-/* Правая секция шапки — кликабельный логотип SpotiCloud */
-.brand-link {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: var(--accent);
-    text-decoration: none;
-    letter-spacing: -1px;
-    transition: color 0.2s ease, transform 0.2s ease;
-    line-height: 1;
-}
-
-.brand-link:hover {
-    color: var(--accent-hover);
-    transform: scale(1.02);
-}
-
-/* Поля ввода (Инпуты) */
-input, textarea {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    background: #2a2a2a;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    color: white;
-    box-sizing: border-box;
-}
-
-input:focus, textarea:focus {
-    border-color: var(--accent);
-    outline: none;
-}
-
-/* Кнопки */
-.btn-main {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 14px;
-    width: 100%;
-    border-radius: 25px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
-}
-
-.btn-main:hover {
-    background-color: var(--accent-hover) !important;
-    background: var(--accent-hover) !important;
-    border-color: var(--accent-hover) !important;
-    transform: scale(1.02);
-}
-
-.btn-outline {
-    background: transparent;
-    border: 1px solid var(--text-dim);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    cursor: pointer;
-}
-
-
-/* === ФОРМА АВТОРИЗАЦИИ === */
-.auth-box {
-    background: var(--bg-card);
-    padding: 40px;
-    border-radius: 15px;
-    width: 100%;
-    max-width: 400px;
-    margin: 100px auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    text-align: center;
-}
-
-.logo-text {
-    font-size: 2.5rem;
-    color: var(--accent);
-    margin-bottom: 30px;
-    letter-spacing: -1px;
-}
-
-.auth-tabs {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 25px;
-}
-
-.auth-tabs span {
-    cursor: pointer;
-    color: var(--text-dim);
-    font-weight: bold;
-    transition: 0.3s;
-}
-
-.auth-tabs span.active {
-    color: var(--accent);
-    border-bottom: 2px solid var(--accent);
-}
-
-
-/* === МИНИМАЛИСТИЧНЫЙ ГЛАЗ ПАРОЛЯ === */
-.password-wrapper {
-    margin-bottom: 0px;
-}
-
-#togglePasswordBtn {
-    outline: none;
-    transition: transform 0.1s ease;
-}
-
-#togglePasswordBtn:active {
-    transform: translateY(-50%) scale(0.9);
-}
-
-#togglePasswordBtn svg {
-    transition: stroke 0.2s ease;
-}
-
-#togglePasswordBtn:hover svg {
-    stroke: #fff;
-}
-
-
-/* === СОВРЕМЕННЫЙ ТУМБЛЕР (SWITCH) === */
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 46px;
-    height: 24px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #404040;
-    transition: 0.3s;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: 0.3s;
-}
-
-input:checked + .slider {
-    background-color: var(--accent);
-}
-
-input:checked + .slider:before {
-    transform: translateX(22px);
-}
-
-.slider.round {
-    border-radius: 24px;
-}
-
-.slider.round:before {
-    border-radius: 50%;
-}
-
-
-/* === СЕТКА ТРЕКОВ (АДАПТИРОВАННАЯ ПОД ШИРОКИЙ ЭКРАН) === */
-.track-grid {
-    display: grid;
-    /* Карточки заполняют весь экран построчно, оставаясь аккуратного размера (180-240px) */
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 24px;
-    margin-top: 30px;
-    width: 100%;
-}
-
-.track-card {
-    background: var(--bg-card);
-    padding: 15px;
-    border-radius: 12px;
-    transition: background-color 0.3s;
-    position: relative;
-    cursor: pointer;
-}
-
-.track-card:hover {
-    background: #282828;
-}
-
-.track-card img {
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: 8px;
-    object-fit: cover;
-    margin-bottom: 10px;
-}
-
-
-/* === БОКОВАЯ ПАНЕЛЬ (SIDEBAR) === */
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: -300px;
-    width: 300px;
-    height: 100%;
-    background-color: #121212;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
-    z-index: 10000;
-    transition: left 0.3s ease;
-    padding: 20px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar.active {
-    left: 0;
-}
-
-.sidebar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #fff;
-}
-
-.btn-close-sidebar {
-    background: none;
-    border: none;
-    color: #b3b3b3;
-    font-size: 28px;
-    cursor: pointer;
-    transition: color 0.2s;
-}
-
-.btn-close-sidebar:hover {
-    color: #fff;
-}
-
-.user-profile-card {
-    text-align: center;
-    margin-top: 30px;
-}
-
-.avatar-placeholder {
-    font-size: 50px;
-    background: #282828;
-    width: 80px;
-    height: 80px;
-    line-height: 80px;
-    border-radius: 50%;
-    margin: 0 auto 15px auto;
-}
-
-#sidebarAvatar {
-    border-color: var(--accent) !important;
-}
-
-.user-profile-card h2 {
-    color: #fff;
-    margin: 0 0 5px 0;
-    font-size: 20px;
-}
-
-.role-badge {
-    background-color: var(--accent) !important;
-    background: var(--accent) !important;
-    color: #fff !important;
-    padding: 4px 10px;
-    border-radius: 12px;
-    display: inline-block;
-    font-size: 12px;
-    text-transform: uppercase;
-    font-weight: bold;
-}
-
-.btn-sidebar-action {
-    width: 100%;
-    background: #282828;
-    color: #fff;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    text-align: left;
-    margin-bottom: 10px;
-    transition: background-color 0.2s;
-}
-
-.btn-sidebar-action:hover {
-    background: #333;
-}
-
-.logout-btn {
-    color: #e91429;
-    background: transparent;
-    transition: background-color 0.2s;
-}
-
-.logout-btn:hover {
-    background: rgba(233, 20, 41, 0.1);
-}
-
-.sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 9998;
-    display: none;
-}
-
-.sidebar-overlay.active {
-    display: block;
-}
-
-
-/* === ПЛЕЕР (PLAYER BAR) === */
-.player-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(18, 18, 18, 0.95);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid #333;
-    padding: 15px 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-sizing: border-box;
-    z-index: 1000;
-}
-
-.player-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    width: 30%;
-}
-
-#playerCover {
-    width: 55px;
-    height: 55px;
-    border-radius: 5px;
-}
-
-audio {
-    width: 40%;
-    filter: invert(1);
-}
-
-
-/* === СТИЛИ ДЛЯ СТРАНИЦЫ АРТИСТА === */
-.btn-back-custom {
-    background: #1a1a1a;
-    color: #ffffff;
-    border: 1px solid #333333;
-    padding: 8px 18px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 13px;
-    transition: all 0.2s ease;
-    outline: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.btn-back-custom:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background-color: rgba(114, 71, 205, 0.05);
-}
-
-.profile-warning {
-    background-color: rgba(233, 20, 41, 0.15);
-    border: 1px solid #e91429;
-    color: #ff5c6c;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-weight: bold;
-    text-align: center;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 0.9; }
-    50% { opacity: 1; transform: scale(1.01); }
-    100% { opacity: 0.9; }
-}
-
-.profile-success {
-    background-color: rgba(114, 71, 205, 0.15);
-    border: 1px solid var(--accent-hover);
-    color: var(--accent-hover);
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-weight: bold;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(114, 71, 205, 0.1);
-}
-
-.artist-card-hero {
-    position: relative;
-    border-radius: 15px;
-    overflow: hidden;
-    background: #1e1e1e;
-    min-height: 280px;
-    display: flex;
-    align-items: flex-end;
-    padding: 30px;
-    box-sizing: border-box;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-    width: 100%;
-}
-
-.artist-hero-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-    filter: blur(12px) brightness(0.45);
-    transform: scale(1.08);
-    z-index: 1;
-}
-
-.artist-hero-content {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 25px;
-    width: 100%;
-}
-
-@media (max-width: 600px) {
-    .artist-hero-content { flex-direction: column; text-align: center; }
-}
-
-.artist-avatar-container img {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid var(--bg-card);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-}
-
-.artist-hero-text h1 {
-    font-size: 2.5rem;
-    margin: 5px 0;
-    font-weight: 800;
-}
-
-.verified-badge {
-    color: #3d91ff;
-    font-size: 12px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.listeners-count {
-    color: var(--text-main);
-    font-size: 15px;
-    margin: 5px 0 12px 0;
-    font-weight: 500;
-}
-
-.artist-bio-text {
-    color: var(--text-dim);
-    font-size: 14px;
-    line-height: 1.5;
-    max-width: 600px;
-    margin: 0;
-}
-
-/* === ФИКСЫ ДЛЯ КНОПКИ ПОДПИСКИ И ИНПУТОВ === */
-#artistPublicFollowBtn {
-    background-color: var(--accent) !important;
-    background: var(--accent) !important;
-    color: white !important;
-    border: none !important;
-}
-
-#artistPublicFollowBtn:hover {
-    background-color: var(--accent-hover) !important;
-    background: var(--accent-hover) !important;
-    transform: scale(1.02);
-    transition: all 0.2s ease;
-}
-
-.followers-count, .followers-count * {
-    color: var(--accent) !important;
-}
-
-/* Фиксы загрузки файлов */
-.file-input input[type="file"] {
-    color: var(--text-dim) !important;
-}
-
-.file-input input[type="file"]::file-selector-button {
-    background-color: var(--accent) !important;
-    background: var(--accent) !important;
-    color: white !important;
-    border: none !important;
-    padding: 8px 16px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.2s ease;
-}
-
-.file-input input[type="file"]::file-selector-button:hover {
-    background-color: var(--accent-hover) !important;
-    background: var(--accent-hover) !important;
-}
-global-header-right .logo-text:hover {
-    color: var(--accent-hover);
-    transition: color 0.2s ease;
-}
-
-.file-input input:focus {
-    outline: none !important;
-    border-color: var(--accent) !important;
-    box-shadow: 0 0 8px rgba(114, 71, 205, 0.6) !important;
-}
-
-.upload-container .hint {
-    color: var(--accent) !important;
-}
-
-/* Кастомные контейнеры файлов */
-.custom-file-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 8px;
-    background: #181818;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #282828;
-}
-
-.custom-file-trigger {
-    background: #2a2a2a;
-    color: #ffffff;
-    border: 1px solid #444444;
-    padding: 6px 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.custom-file-trigger:hover {
-    border-color: var(--accent);
-    background-color: #333333;
-}
-
-.custom-file-text {
-    color: #b3b3b3;
-    font-size: 13px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 250px;
-}
-
-.custom-file-text.file-selected {
-    color: var(--accent-hover);
-}
+     --bg-dark: #121212;
+     --bg-card: #1e1e1e;
+     --accent: #7247cd; /* Тот самый приятный фиолетовый */
+     --accent-hover: #8a55ec; /* Светлый фиолетовый для ховеров */
+     --text-main: #ffffff;
+     --text-dim: #b3b3b3;
+     --glass: rgba(255, 255, 255, 0.05);
+ }
+
+ /* === БАЗОВЫЕ СТИЛИ === */
+ body {
+     margin: 0;
+     font-family: 'Segoe UI', Roboto, sans-serif;
+     background: linear-gradient(135deg, #121212 0%, #000000 100%);
+     color: var(--text-main);
+     min-height: 100vh;
+ }
+
+ /* Полный Full-width режим: сайт тянется на весь экран с красивыми отступами */
+ .container {
+     max-width: 100% !important;
+     width: 100%;
+     box-sizing: border-box;
+     padding: 30px 40px;
+     padding-bottom: 120px; /* Чтобы плеер внизу не перекрывал карточки */
+ }
+
+ /* Обертка для шапки, раскидывает элементы строго по углам экрана */
+ .header-wrapper {
+     display: flex;
+     justify-content: space-between;
+     align-items: flex-start; /* Выравнивание по верхнему краю */
+     width: 100%;
+     margin-bottom: 30px;
+ }
+
+ /* Левая секция шапки (кнопка меню, смена языка и т.д.) */
+ .header-left {
+     display: flex;
+     flex-direction: column;
+     gap: 12px; /* Расстояние между кнопкой меню и переключателем языка */
+     align-items: flex-start;
+ }
+
+ /* Правая секция шапки — кликабельный логотип SpotiCloud */
+ .brand-link {
+     font-size: 2.2rem;
+     font-weight: 800;
+     color: var(--accent);
+     text-decoration: none;
+     letter-spacing: -1px;
+     transition: color 0.2s ease, transform 0.2s ease;
+     line-height: 1;
+ }
+
+ .brand-link:hover {
+     color: var(--accent-hover);
+     transform: scale(1.02);
+ }
+
+ /* Поля ввода (Инпуты) */
+ input, textarea {
+     width: 100%;
+     padding: 12px;
+     margin-bottom: 15px;
+     background: #2a2a2a;
+     border: 1px solid transparent;
+     border-radius: 8px;
+     color: white;
+     box-sizing: border-box;
+ }
+
+ input:focus, textarea:focus {
+     border-color: var(--accent);
+     outline: none;
+ }
+
+ /* Кнопки */
+ .btn-main {
+     background: var(--accent);
+     color: white;
+     border: none;
+     padding: 14px;
+     width: 100%;
+     border-radius: 25px;
+     font-weight: bold;
+     cursor: pointer;
+     transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
+ }
+
+ .btn-main:hover {
+     background-color: var(--accent-hover) !important;
+     background: var(--accent-hover) !important;
+     border-color: var(--accent-hover) !important;
+     transform: scale(1.02);
+ }
+
+ .btn-outline {
+     background: transparent;
+     border: 1px solid var(--text-dim);
+     color: white;
+     padding: 8px 16px;
+     border-radius: 20px;
+     cursor: pointer;
+ }
+
+
+ /* === ФОРМА АВТОРИЗАЦИИ === */
+ .auth-box {
+     background: var(--bg-card);
+     padding: 40px;
+     border-radius: 15px;
+     width: 100%;
+     max-width: 400px;
+     margin: 100px auto;
+     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+     text-align: center;
+ }
+
+ .logo-text {
+     font-size: 2.5rem;
+     color: var(--accent);
+     margin-bottom: 30px;
+     letter-spacing: -1px;
+ }
+
+ .auth-tabs {
+     display: flex;
+     justify-content: center;
+     gap: 20px;
+     margin-bottom: 25px;
+ }
+
+ .auth-tabs span {
+     cursor: pointer;
+     color: var(--text-dim);
+     font-weight: bold;
+     transition: 0.3s;
+ }
+
+ .auth-tabs span.active {
+     color: var(--accent);
+     border-bottom: 2px solid var(--accent);
+ }
+
+
+ /* === МИНИМАЛИСТИЧНЫЙ ГЛАЗ ПАРОЛЯ === */
+ .password-wrapper {
+     margin-bottom: 0px;
+ }
+
+ #togglePasswordBtn {
+     outline: none;
+     transition: transform 0.1s ease;
+ }
+
+ #togglePasswordBtn:active {
+     transform: translateY(-50%) scale(0.9);
+ }
+
+ #togglePasswordBtn svg {
+     transition: stroke 0.2s ease;
+ }
+
+ #togglePasswordBtn:hover svg {
+     stroke: #fff;
+ }
+
+
+ /* === СОВРЕМЕННЫЙ ТУМБЛЕР (SWITCH) === */
+ .switch {
+     position: relative;
+     display: inline-block;
+     width: 46px;
+     height: 24px;
+ }
+
+ .switch input {
+     opacity: 0;
+     width: 0;
+     height: 0;
+ }
+
+ .slider {
+     position: absolute;
+     cursor: pointer;
+     top: 0;
+     left: 0;
+     right: 0;
+     bottom: 0;
+     background-color: #404040;
+     transition: 0.3s;
+ }
+
+ .slider:before {
+     position: absolute;
+     content: "";
+     height: 18px;
+     width: 18px;
+     left: 3px;
+     bottom: 3px;
+     background-color: white;
+     transition: 0.3s;
+ }
+
+ input:checked + .slider {
+     background-color: var(--accent);
+ }
+
+ input:checked + .slider:before {
+     transform: translateX(22px);
+ }
+
+ .slider.round {
+     border-radius: 24px;
+ }
+
+ .slider.round:before {
+     border-radius: 50%;
+ }
+
+
+ /* === СЕТКА ТРЕКОВ (АДАПТИРОВАННАЯ ПОД ШИРОКИЙ ЭКРАН) === */
+ .track-grid {
+     display: grid;
+     /* Карточки заполняют весь экран построчно, оставаясь аккуратного размера (180-240px) */
+     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+     gap: 24px;
+     margin-top: 30px;
+     width: 100%;
+ }
+
+ .track-card {
+     background: var(--bg-card);
+     padding: 15px;
+     border-radius: 12px;
+     transition: background-color 0.3s;
+     position: relative;
+     cursor: pointer;
+ }
+
+ .track-card:hover {
+     background: #282828;
+ }
+
+ .track-card img {
+     width: 100%;
+     aspect-ratio: 1;
+     border-radius: 8px;
+     object-fit: cover;
+     margin-bottom: 10px;
+ }
+
+
+ /* === БОКОВАЯ ПАНЕЛЬ (SIDEBAR) === */
+ .sidebar {
+     position: fixed;
+     top: 0;
+     left: -300px;
+     width: 300px;
+     height: 100%;
+     background-color: #121212;
+     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+     z-index: 10000;
+     transition: left 0.3s ease;
+     padding: 20px;
+     box-sizing: border-box;
+     display: flex;
+     flex-direction: column;
+ }
+
+ .sidebar.active {
+     left: 0;
+ }
+
+ .sidebar-header {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     color: #fff;
+ }
+
+ .btn-close-sidebar {
+     background: none;
+     border: none;
+     color: #b3b3b3;
+     font-size: 28px;
+     cursor: pointer;
+     transition: color 0.2s;
+ }
+
+ .btn-close-sidebar:hover {
+     color: #fff;
+ }
+
+ .user-profile-card {
+     text-align: center;
+     margin-top: 30px;
+ }
+
+ .avatar-placeholder {
+     font-size: 50px;
+     background: #282828;
+     width: 80px;
+     height: 80px;
+     line-height: 80px;
+     border-radius: 50%;
+     margin: 0 auto 15px auto;
+ }
+
+ #sidebarAvatar {
+     border-color: var(--accent) !important;
+ }
+
+ .user-profile-card h2 {
+     color: #fff;
+     margin: 0 0 5px 0;
+     font-size: 20px;
+ }
+
+ .role-badge {
+     background-color: var(--accent) !important;
+     background: var(--accent) !important;
+     color: #fff !important;
+     padding: 4px 10px;
+     border-radius: 12px;
+     display: inline-block;
+     font-size: 12px;
+     text-transform: uppercase;
+     font-weight: bold;
+ }
+
+ .btn-sidebar-action {
+     width: 100%;
+     background: #282828;
+     color: #fff;
+     border: none;
+     padding: 12px;
+     border-radius: 8px;
+     cursor: pointer;
+     font-weight: bold;
+     text-align: left;
+     margin-bottom: 10px;
+     transition: background-color 0.2s;
+ }
+
+ .btn-sidebar-action:hover {
+     background: #333;
+ }
+
+ .logout-btn {
+     color: #e91429;
+     background: transparent;
+     transition: background-color 0.2s;
+ }
+
+ .logout-btn:hover {
+     background: rgba(233, 20, 41, 0.1);
+ }
+
+ .sidebar-overlay {
+     position: fixed;
+     top: 0;
+     left: 0;
+     width: 100%;
+     height: 100%;
+     background: rgba(0, 0, 0, 0.6);
+     z-index: 9998;
+     display: none;
+ }
+
+ .sidebar-overlay.active {
+     display: block;
+ }
+
+
+ /* === ПЛЕЕР (PLAYER BAR) === */
+ .player-bar {
+     position: fixed;
+     bottom: 0;
+     left: 0;
+     width: 100%;
+     background: rgba(18, 18, 18, 0.95);
+     backdrop-filter: blur(10px);
+     border-top: 1px solid #333;
+     padding: 15px 40px;
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     box-sizing: border-box;
+     z-index: 1000;
+ }
+
+ .player-info {
+     display: flex;
+     align-items: center;
+     gap: 15px;
+     width: 30%;
+ }
+
+ #playerCover {
+     width: 55px;
+     height: 55px;
+     border-radius: 5px;
+ }
+
+ audio {
+     width: 40%;
+     filter: invert(1);
+ }
+
+
+ /* === СТИЛИ ДЛЯ СТРАНИЦЫ АРТИСТА === */
+ .btn-back-custom {
+     background: #1a1a1a;
+     color: #ffffff;
+     border: 1px solid #333333;
+     padding: 8px 18px;
+     border-radius: 20px;
+     cursor: pointer;
+     font-weight: 600;
+     font-size: 13px;
+     transition: all 0.2s ease;
+     outline: none;
+     display: inline-flex;
+     align-items: center;
+     gap: 8px;
+ }
+
+ .btn-back-custom:hover {
+     border-color: var(--accent);
+     color: var(--accent);
+     background-color: rgba(114, 71, 205, 0.05);
+ }
+
+ .profile-warning {
+     background-color: rgba(233, 20, 41, 0.15);
+     border: 1px solid #e91429;
+     color: #ff5c6c;
+     padding: 15px;
+     border-radius: 8px;
+     margin-bottom: 20px;
+     font-weight: bold;
+     text-align: center;
+     animation: pulse 2s infinite;
+ }
+
+ @keyframes pulse {
+     0% { opacity: 0.9; }
+     50% { opacity: 1; transform: scale(1.01); }
+     100% { opacity: 0.9; }
+ }
+
+ .profile-success {
+     background-color: rgba(114, 71, 205, 0.15);
+     border: 1px solid var(--accent-hover);
+     color: var(--accent-hover);
+     padding: 15px;
+     border-radius: 8px;
+     margin-bottom: 20px;
+     font-weight: bold;
+     text-align: center;
+     box-shadow: 0 4px 12px rgba(114, 71, 205, 0.1);
+ }
+
+ .artist-card-hero {
+     position: relative;
+     border-radius: 15px;
+     overflow: hidden;
+     background: #1e1e1e;
+     min-height: 280px;
+     display: flex;
+     align-items: flex-end;
+     padding: 30px;
+     box-sizing: border-box;
+     box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+     width: 100%;
+ }
+
+ .artist-hero-bg {
+     position: absolute;
+     top: 0;
+     left: 0;
+     width: 100%;
+     height: 100%;
+     background-size: cover;
+     background-position: center;
+     filter: blur(12px) brightness(0.45);
+     transform: scale(1.08);
+     z-index: 1;
+ }
+
+ .artist-hero-content {
+     position: relative;
+     z-index: 2;
+     display: flex;
+     align-items: center;
+     gap: 25px;
+     width: 100%;
+ }
+
+ @media (max-width: 600px) {
+     .artist-hero-content { flex-direction: column; text-align: center; }
+ }
+
+ .artist-avatar-container img {
+     width: 150px;
+     height: 150px;
+     border-radius: 50%;
+     object-fit: cover;
+     border: 4px solid var(--bg-card);
+     box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+ }
+
+ .artist-hero-text h1 {
+     font-size: 2.5rem;
+     margin: 5px 0;
+     font-weight: 800;
+ }
+
+ .verified-badge {
+     color: #3d91ff;
+     font-size: 12px;
+     font-weight: bold;
+     text-transform: uppercase;
+     letter-spacing: 1px;
+ }
+
+ .listeners-count {
+     color: var(--text-main);
+     font-size: 15px;
+     margin: 5px 0 12px 0;
+     font-weight: 500;
+ }
+
+ .artist-bio-text {
+     color: var(--text-dim);
+     font-size: 14px;
+     line-height: 1.5;
+     max-width: 600px;
+     margin: 0;
+ }
+
+ /* === ФИКСЫ ДЛЯ КНОПКИ ПОДПИСКИ И ИНПУТОВ === */
+ #artistPublicFollowBtn {
+     background-color: var(--accent) !important;
+     background: var(--accent) !important;
+     color: white !important;
+     border: none !important;
+ }
+
+ #artistPublicFollowBtn:hover {
+     background-color: var(--accent-hover) !important;
+     background: var(--accent-hover) !important;
+     transform: scale(1.02);
+     transition: all 0.2s ease;
+ }
+
+ .followers-count, .followers-count * {
+     color: var(--accent) !important;
+ }
+
+ /* Фиксы загрузки файлов */
+ .file-input input[type="file"] {
+     color: var(--text-dim) !important;
+ }
+
+ .file-input input[type="file"]::file-selector-button {
+     background-color: var(--accent) !important;
+     background: var(--accent) !important;
+     color: white !important;
+     border: none !important;
+     padding: 8px 16px;
+     border-radius: 20px;
+     cursor: pointer;
+     font-weight: bold;
+     transition: all 0.2s ease;
+ }
+
+ .file-input input[type="file"]::file-selector-button:hover {
+     background-color: var(--accent-hover) !important;
+     background: var(--accent-hover) !important;
+ }
+ global-header-right .logo-text:hover {
+     color: var(--accent-hover);
+     transition: color 0.2s ease;
+ }
+
+ .file-input input:focus {
+     outline: none !important;
+     border-color: var(--accent) !important;
+     box-shadow: 0 0 8px rgba(114, 71, 205, 0.6) !important;
+ }
+
+ .upload-container .hint {
+     color: var(--accent) !important;
+ }
+
+ /* Кастомные контейнеры файлов */
+ .custom-file-container {
+     display: flex;
+     align-items: center;
+     gap: 12px;
+     margin-top: 8px;
+     background: #181818;
+     padding: 8px;
+     border-radius: 6px;
+     border: 1px solid #282828;
+ }
+
+ .custom-file-trigger {
+     background: #2a2a2a;
+     color: #ffffff;
+     border: 1px solid #444444;
+     padding: 6px 14px;
+     border-radius: 4px;
+     cursor: pointer;
+     font-size: 13px;
+     font-weight: 500;
+     transition: all 0.2s ease;
+ }
+
+ .custom-file-trigger:hover {
+     border-color: var(--accent);
+     background-color: #333333;
+ }
+
+ .custom-file-text {
+     color: #b3b3b3;
+     font-size: 13px;
+     white-space: nowrap;
+     overflow: hidden;
+     text-overflow: ellipsis;
+     max-width: 250px;
+ }
+
+ .custom-file-text.file-selected {
+     color: var(--accent-hover);
+ }

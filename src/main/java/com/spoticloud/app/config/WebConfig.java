@@ -19,6 +19,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:///C:/spcl_uploads/spoticloud_covers/");
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:///C:/spcl_uploads/spoticloud_artists/");
+        registry.addResourceHandler("/media/avatars/**")
+                .addResourceLocations("file:///C:/spoticloud_uploads/avatars/");
     }
 
 }

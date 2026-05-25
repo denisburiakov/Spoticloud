@@ -29,6 +29,7 @@ let artistProfile = JSON.parse(localStorage.getItem('artistProfileData')) || {
 
 const translations = {
     ru: {
+        btnUserSettings: "Настройки профиля",
         followersSuffix: "подписчиков",
         btnFollow: "Подписаться",
         btnUnfollow: "Вы подписаны",
@@ -81,12 +82,17 @@ const translations = {
         bioEmpty: "Описание отсутствует.",
         btnChooseAvatar: "Выбрать аватар",
         btnChooseBg: "Выбрать баннер",
-
+        userProfileTitle: "Редактирование профиля",
+        userAvatarLabel: "Сменить аватар:",
+        userBioLabel: "О себе:",
+        userSaveBtn: "Сохранить",
+        userCancelBtn: "Отмена",
         profileBackBtn: "← Назад на Главную",
         profileSubTitle: "Официальный профиль исполнителя",
         profileReleases: "Все релизы",
         profileNoTracks: "У этого артиста пока нет треков...",
-
+        userProfileTitle: "Редактирование профиля", // "Редактирвоать профиль"
+                userBioPlaceholder: "Здесь будет описание вашего профиля", // Исправлен текст
         alertEmpty: "Заполните обязательные поля.",
         alertWeakPass: "Пароль не соответствует требованиям безопасности.\n\nТребования:\n— Минимум 8 символов\n— Минимум одна буква\n— Минимум один спецсимвол (!@#$%^&*...)",
         alertNotAuth: "Вы не авторизованы. Пожалуйста, войдите в аккаунт повторно.",
@@ -100,7 +106,15 @@ const translations = {
         alertSaveSuccess: "Профиль артиста успешно сохранен."
     },
     en: {
-    artistConsole: "Artist Console",
+        userProfileTitle: "Edit Profile",
+        userBioPlaceholder: "Your profile description will be here",
+        userProfileTitle: "Edit Profile",
+        userAvatarLabel: "Change avatar:",
+        userBioLabel: "About me:",
+        userSaveBtn: "Save",
+        userCancelBtn: "Cancel",
+        artistConsole: "Artist Console",
+        btnUserSettings: "Profile Settings",
         followersSuffix: "followers",
         btnFollow: "Follow",
         btnUnfollow: "Following",
@@ -523,54 +537,71 @@ async function handleRegister() {
 }
 
 function showView(viewId) {
-    // 1. Скрываем все секции
+    // 1. Скрываем вообще ВСЕ секции (основные страницы)
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
 
+    // 2. ЖЕСТКИЙ СБРОС: принудительно прячем формы внутри страниц,
+    // чтобы они не оставались открытыми при переключении
+    const formsToReset = [
+        'user-profile-form',
+        'artist-profile-form'
+    ];
+    const displaysToReset = [
+        'user-profile-display',
+        'artist-profile-display'
+    ];
+
+    formsToReset.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+
+    displaysToReset.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'flex';
+    });
+
+    // 3. Показываем целевую страницу
     const targetView = document.getElementById(viewId);
     if (targetView) targetView.style.display = 'block';
 
-    // 2. Управляем плеером
+    // 4. Управление элементами интерфейса (плеер, шапка)
+    const isAuth = (viewId === 'auth-page');
     const playerBar = document.getElementById('player-bar');
-    if (playerBar) {
-        playerBar.style.display = (viewId === 'auth-page') ? 'none' : 'flex';
-    }
-
-    // 3. Управляем шапкой
     const appNavbar = document.getElementById('app-navigation-bar');
-    if (appNavbar) {
-        appNavbar.style.display = (viewId === 'auth-page') ? 'none' : 'flex';
-    }
 
+    if (playerBar) playerBar.style.display = isAuth ? 'none' : 'flex';
+    if (appNavbar) appNavbar.style.display = isAuth ? 'none' : 'flex';
+
+    // 5. Логика заголовков
     const mainTitle = document.getElementById('mainHeaderTitle');
     const searchContainer = document.getElementById('searchBarContainer');
 
-    // 4. МЕНЯЕМ КЛЮЧИ ПЕРЕВОДА ДЛЯ ЗАГОЛОВКА
     if (viewId === 'main-page') {
         if (mainTitle) mainTitle.setAttribute('data-translate', 'mainHeader');
         if (searchContainer) searchContainer.style.display = 'flex';
-        fetchTracks();
+        if (typeof fetchTracks === 'function') fetchTracks();
     } else {
         if (searchContainer) searchContainer.style.display = 'none';
 
         if (mainTitle) {
-            if (viewId === 'artist-page') {
-                mainTitle.setAttribute('data-translate', 'artistConsole');
-            } else if (viewId === 'artist-profile-page') {
-                mainTitle.setAttribute('data-translate', 'artistProfile');
-            } else if (viewId === 'artist-public-page') {
-                mainTitle.setAttribute('data-translate', 'publicProfile');
-            }
+            if (viewId === 'artist-page') mainTitle.setAttribute('data-translate', 'artistConsole');
+            else if (viewId === 'artist-profile-page') mainTitle.setAttribute('data-translate', 'artistProfile');
+            else if (viewId === 'artist-public-page') mainTitle.setAttribute('data-translate', 'publicProfile');
         }
     }
 
-    // Принудительно вызываем перевод, чтобы он обновил заголовок по новому ключу
+    // 6. Обновление языка
     if (typeof changeLanguage === 'function') {
         changeLanguage(currentLang || 'ru');
     }
 
-    // 5. Твои специфичные хуки
-    if (viewId === 'artist-profile-page') {
+    // 7. Специфичные хуки для подгрузки данных
+    if (viewId === 'artist-profile-page' && typeof checkAndRenderArtistProfile === 'function') {
         checkAndRenderArtistProfile();
+    }
+    if (viewId === 'user-profile-page' && typeof loadUserProfile === 'function') {
+        loadUserProfile();
     }
 }
 
@@ -1213,7 +1244,7 @@ function playNextTrack() {
 
     playCurrentTrack();
 }
-//ye
+
 
 audio.addEventListener('ended', () => {
     if (isLoopActive) {
@@ -1227,6 +1258,112 @@ audio.addEventListener('ended', () => {
 });
 
 
+async function loadUserProfile() {
+    const username = localStorage.getItem('username');
+    if (!username) return;
+
+    try {
+        // 1. Указываем полный адрес с портом 8081
+        const response = await fetch(`http://localhost:8081/api/v1/user/profile/${username}`);
+
+        if (response.ok) {
+            const data = await response.json();
+
+            // 2. Обновляем текстовые поля
+            document.getElementById('userDisplayName').innerText = data.username;
+            document.getElementById('userBioInput').value = data.bio || "";
+
+            // 3. ПРАВИЛЬНАЯ ОБРАБОТКА КАРТИНКИ
+            if (data.avatarUrl) {
+                // Добавляем порт 8081 к пути, который пришел с сервера
+                const fullAvatarUrl = 'http://localhost:8081' + data.avatarUrl;
+
+                // Добавляем timestamp, чтобы сбросить кеш браузера
+                document.getElementById('userDisplayAvatar').src = fullAvatarUrl + "?t=" + new Date().getTime();
+
+                // Если нужно обновить и в сайдбаре:
+                const sidebarAvatar = document.getElementById('sidebarAvatar');
+                if (sidebarAvatar) {
+                    sidebarAvatar.src = fullAvatarUrl + "?t=" + new Date().getTime();
+                }
+            }
+        } else {
+            console.error("Ошибка API: ", response.status);
+        }
+    } catch (e) {
+        console.error("Ошибка загрузки профиля", e);
+    }
+}
+
+// 2. Сохранение профиля
+async function saveUserProfile() {
+    const username = localStorage.getItem('username');
+    const bio = document.getElementById('userBioInput').value;
+    const avatarFile = document.getElementById('userAvatarFile').files[0];
+
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('bio', bio);
+    if (avatarFile) {
+        formData.append('avatar', avatarFile);
+    }
+
+    try {
+        const response = await fetch('http://localhost:8081/api/v1/user/profile/update', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert("Профиль обновлен!");
+            const userDisplayBio = document.getElementById('userDisplayBio');
+                        if (userDisplayBio) {
+                            userDisplayBio.innerText = bio; // Обновляем текст сразу из переменной
+                        }
+            toggleUserEditor(false);
+            // Если пришел путь к новой картинке — просто обнови src
+            if (result.avatarUrl) {
+                const fullUrl = 'http://localhost:8081' + result.avatarUrl + "?t=" + new Date().getTime();
+
+                // Обновляем аватарку в профиле
+                const userDisplayAvatar = document.getElementById('userDisplayAvatar');
+                if (userDisplayAvatar) userDisplayAvatar.src = fullUrl;
+
+                // Обновляем аватарку в сайдбаре
+                const sidebarAvatar = document.getElementById('sidebarAvatar');
+                if (sidebarAvatar) sidebarAvatar.src = fullUrl;
+            }
+
+            // Если нужно, перегрузи данные
+            loadUserProfile();
+        } else {
+            alert("Ошибка: " + result.error);
+        }
+    } catch (e) {
+        console.error("Критическая ошибка сохранения:", e);
+    }
+}
+
+function toggleUserEditor(show) {
+    // ПРОВЕРКА: если мы не на странице юзера, выходим
+    if (document.getElementById('user-profile-page').style.display === 'none') {
+        console.warn("Попытка редактировать профиль юзера с другой страницы!");
+        return;
+    }
+
+    const displayBlock = document.getElementById('user-profile-display');
+    const formBlock = document.getElementById('user-profile-form');
+
+    if (show) {
+        displayBlock.style.display = 'none';
+        formBlock.style.display = 'block';
+    } else {
+        displayBlock.style.display = 'flex';
+        formBlock.style.display = 'none';
+    }
+}
 
 window.onload = () => {
     showView('auth-page');
