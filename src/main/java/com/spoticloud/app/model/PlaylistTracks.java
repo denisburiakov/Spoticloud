@@ -26,9 +26,6 @@ public class PlaylistTracks {
     @JoinColumn(name = "track_id")
     private Track track;
 
-    @Column(nullable = false)
-    private Integer position;
-
     @CreationTimestamp
     private OffsetDateTime addedAt;
 }

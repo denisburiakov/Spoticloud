@@ -8,7 +8,7 @@ const langSelect = document.getElementById('langSelect');
 let isLoopActive = false;
 let isShuffleActive = false;
 const audio = document.getElementById('mainAudio');
-
+let currentPlaylistId = null;
 let currentTrackIndex = 0;
 let tracks = [];
 let currentOpenedArtistId = null;
@@ -29,6 +29,13 @@ let artistProfile = JSON.parse(localStorage.getItem('artistProfileData')) || {
 
 const translations = {
     ru: {
+        add_track: 'Добавить трек',
+        no_tracks: 'В плейлисте пока нет треков.',
+        myPlaylists: "Мои плейлисты",
+        btnCreatePlaylist: "Создать плейлист",
+       createPlaylistTitle: "Создать плейлист",
+        btnSavePlaylist: "Создать",
+        playlistTitlePlaceholder: "Введите название плейлиста",
         btnUserSettings: "Настройки профиля",
         followersSuffix: "подписчиков",
         btnFollow: "Подписаться",
@@ -103,10 +110,19 @@ const translations = {
         alertBackendError: "Ошибка соединения с сервером.",
         alertRegSuccess: "Регистрация успешно завершена. Вы можете войти.",
         alertFormError: "Пожалуйста, укажите количество слушателей и заполните описание.",
-        alertSaveSuccess: "Профиль артиста успешно сохранен."
+        alertSaveSuccess: "Профиль артиста успешно сохранен.",
+        select_track: "Выберите трек"
     },
     en: {
+        select_track: "Choose track",
+        add_track: 'Add track',
+        no_tracks: 'No tracks in playlist yet.',
+        myPlaylists: "My playlists",
+        btnCreatePlaylist: "Create playlist",
+        createPlaylistTitle: "Create playlist",
+        btnSavePlaylist: "Create",
         userProfileTitle: "Edit Profile",
+        playlistTitlePlaceholder: "Enter playlist title",
         userBioPlaceholder: "Your profile description will be here",
         userProfileTitle: "Edit Profile",
         userAvatarLabel: "Change avatar:",
@@ -199,6 +215,7 @@ const backBtnStyles = `
     transition: all 0.2s ease;
     outline: none;
 `;
+
 
 function applyBackBtnHover(btn) {
     if (!btn) return;
@@ -461,6 +478,7 @@ async function handleAuthSubmit() {
             if (response.ok) {
                 const data = await response.json();
                 localStorage.setItem('username', data.username);
+                localStorage.setItem('userId', data.id);
 
                 const role = data.role ? data.role.toString().toUpperCase() : "USER";
                 localStorage.setItem('role', role);
@@ -602,6 +620,7 @@ function showView(viewId) {
     }
     if (viewId === 'user-profile-page' && typeof loadUserProfile === 'function') {
         loadUserProfile();
+        loadUserPlaylists();
     }
 }
 
@@ -1365,8 +1384,185 @@ function toggleUserEditor(show) {
     }
 }
 
+
+
+async function createNewPlaylist() {
+    const title = document.getElementById('newPlaylistTitle').value;
+    const coverFile = document.getElementById('playlistCover').files[0];
+    const userId = localStorage.getItem('userId');
+
+    const formData = new FormData();
+    formData.append('userId', userId);
+    formData.append('title', title);
+    if (coverFile) {
+        formData.append('cover', coverFile);
+    }
+
+    const response = await fetch('http://localhost:8081/api/v1/playlists/create', {
+        method: 'POST',
+        body: formData // Автоматически установит Content-Type: multipart/form-data
+    });
+
+    if (response.ok) {
+        alert("Плейлист с обложкой создан!");
+        await loadUserPlaylists();
+        showView('user-profile-page');
+    }
+}
+
+async function loadUserPlaylists() {
+    const userId = localStorage.getItem('userId');
+    const container = document.getElementById('userPlaylistsGrid');
+
+    try {
+        const response = await fetch(`http://localhost:8081/api/v1/playlists/my?userId=${userId}`);
+        const playlists = await response.json();
+
+        container.innerHTML = ''; // Очищаем контейнер
+
+        playlists.forEach(playlist => {
+            const card = document.createElement('div');
+            card.className = 'playlist-card';
+            // Добавляем стиль для курсора, чтобы было понятно, что карточка кликабельна
+            card.style = "background: #181818; padding: 10px; border-radius: 8px; text-align: center; cursor: pointer; transition: transform 0.2s;";
+
+            // Добавляем эффект при наведении (опционально)
+            card.onmouseover = () => card.style.transform = "scale(1.03)";
+            card.onmouseout = () => card.style.transform = "scale(1)";
+
+            // ВАЖНО: Вешаем обработчик клика на всю карточку
+            card.onclick = () => openPlaylistPage(playlist.id);
+
+            const coverUrl = playlist.coverImageUrl ? `http://localhost:8081${playlist.coverImageUrl}` : 'default-cover.jpg';
+
+            card.innerHTML = `
+                <img src="${coverUrl}" style="width: 100%; aspect-ratio: 1; border-radius: 4px; object-fit: cover;">
+                <h4 style="color: white; margin: 10px 0 0 0;">${playlist.title}</h4>
+            `;
+            container.appendChild(card);
+        });
+    } catch (e) {
+        console.error("Ошибка загрузки плейлистов:", e);
+    }
+}
+
+async function openPlaylistPage(playlistId) {
+    try {
+        // 1. Показываем нужную секцию
+        showView('playlist-details-page');
+
+        // 2. Получаем данные (ИСПРАВЛЕНО: await response.json())
+        const response = await fetch(`http://localhost:8081/api/v1/playlists/${playlistId}`);
+        if (!response.ok) throw new Error('Ошибка при загрузке данных плейлиста');
+
+        const playlist = await response.json();
+
+        // 3. Заполняем заголовок и картинку
+        document.getElementById('playlist-header-title').innerText = playlist.title || 'Без названия';
+
+        const headerCover = document.getElementById('playlist-header-cover');
+        headerCover.src = playlist.coverImageUrl
+            ? (playlist.coverImageUrl.startsWith('http') ? playlist.coverImageUrl : `http://localhost:8081${playlist.coverImageUrl}`)
+            : 'default-cover.jpg';
+
+        // 4. ПРИВЯЗЫВАЕМ кнопку добавления к текущему playlistId
+        const addTrackBtn = document.querySelector('[data-translate="add_track"]');
+        addTrackBtn.onclick = () => openAddTrackPage(playlistId);
+
+        // 5. Рендерим треки
+        const list = document.getElementById('playlist-tracks-list');
+        list.innerHTML = '';
+        const trackQueue = playlist.tracks.map(t => {
+            // Если у тебя в DTO приходит audioUrl, используем его,
+            // если нет — пробуем взять ID как имя файла (если они совпадают)
+            const fileName = t.audioUrl || `${t.id}.mp3`;
+
+            return {
+                ...t,
+                url: fileName.split('\\').pop().split('/').pop(),
+                coverUrl: playlist.coverImageUrl ? `http://localhost:8081${playlist.coverImageUrl}` : 'https://via.placeholder.com/150'
+            };
+        });
+
+       if (playlist.tracks && playlist.tracks.length > 0) {
+           playlist.tracks.forEach((track, index) => {
+               const trackRow = document.createElement('div');
+               trackRow.className = 'track-row';
+               trackRow.style.cssText = "cursor: pointer; padding: 10px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;";
+
+               // ВАЖНО: Передаем не просто ID, а весь список и индекс
+               trackRow.onclick = () => setQueueAndPlay(trackQueue, index);
+
+               trackRow.innerHTML = `
+                   <div class="track-info-main">
+                       <div class="track-title">${track.title}</div>
+                       <div class="track-artist">${track.artistName || 'Неизвестный артист'}</div>
+                   </div>
+                   <div class="play-icon">▶</div>
+               `;
+               list.appendChild(trackRow);
+           });
+        } else {
+
+            list.innerHTML = '';
+        }
+
+    } catch (error) {
+        console.error("Ошибка в openPlaylistPage:", error);
+    }
+}
+function openAddTrackPage(playlistId) {
+    currentPlaylistId = playlistId; // Запоминаем, куда добавляем
+    showView('add-track-page');
+    loadAllTracks(); // Функция, которая тянет список всех песен
+}
+
+async function loadAllTracks() {
+    try {
+        // Стучимся в твой TrackController
+        const response = await fetch('http://localhost:8081/api/v1/tracks');
+        const tracks = await response.json();
+
+        const container = document.getElementById('all-tracks-grid');
+        container.innerHTML = '';
+
+        tracks.forEach(track => {
+            // track.id, track.title, track.artistName - всё это придет из твоего DTO
+            container.innerHTML += `
+                <div class="track-card" style="padding: 10px; border: 1px solid #444; cursor: pointer;"
+                     onclick="addTrackToPlaylist('${track.id}')">
+                    <h4>${track.title}</h4>
+                    <p>${track.artistName || 'Артист'}</p>
+                </div>
+            `;
+        });
+    } catch (e) {
+        console.error("Ошибка загрузки всех треков:", e);
+    }
+}
+
+async function addTrackToPlaylist(trackId) {
+    // currentPlaylistId мы запомнили в переменной ранее
+    const response = await fetch(`http://localhost:8081/api/v1/playlists/${currentPlaylistId}/add-track?trackId=${trackId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (response.ok) {
+        alert("Трек добавлен в плейлист!");
+        openPlaylistPage(currentPlaylistId); // Возвращаемся в плейлист
+    } else {
+        alert("Ошибка при добавлении.");
+    }
+}
+
+
 window.onload = () => {
     showView('auth-page');
     changeLanguage(currentLang);
 };
+
+
 

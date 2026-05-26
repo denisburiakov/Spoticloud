@@ -1,5 +1,7 @@
 package com.spoticloud.app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,16 +42,16 @@ public class Playlist {
     // Ссылка на владельца плейлиста (User)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
+    @JsonIgnore
     private User owner;
 
-    // Список треков в плейлисте
-    // Предполагаю, что сущность называется Track
     @ManyToMany
     @JoinTable(
             name = "playlist_tracks",
             joinColumns = @JoinColumn(name = "playlist_id"),
             inverseJoinColumns = @JoinColumn(name = "track_id")
     )
+    @JsonIgnoreProperties({"playlists", "hibernateLazyInitializer", "handler"})
     private List<Track> tracks = new ArrayList<>();
 
     @CreationTimestamp

@@ -638,3 +638,13 @@
  .custom-file-text.file-selected {
      color: var(--accent-hover);
  }
+
+ .btn-playlist-purple {
+     background: #8a2be2;
+     color: white;
+     border: none;
+ }
+
+ .btn-playlist-purple:hover {
+     background: #9b30ff;
+ }

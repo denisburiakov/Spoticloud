@@ -34,6 +34,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/artist/profile/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/v1/user/**").permitAll()
+                        .requestMatchers("/api/v1/playlists/**").permitAll()
                         .anyRequest().authenticated()
                 )
 

@@ -30,24 +30,36 @@
             <h3 data-translate="sidebarTitle">Профиль</h3>
             <button onclick="toggleSidebar(false)" class="btn-close-sidebar">×</button>
         </div>
+
+
+
         <div class="sidebar-content">
             <div class="user-profile-card" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 0;">
-                <img id="sidebarAvatar" src="https://via.placeholder.com/150/282828/FFFFFF?text=User" alt="Avatar"
-                     style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #1db954;">
-
+                <img id="sidebarAvatar" src="..." alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #1db954;">
                 <h2 id="sidebarUsername" style="margin: 5px 0 0 0; color: #fff;">Username</h2>
                 <p id="sidebarRole" class="role-badge">User</p>
             </div>
 
             <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
 
+            <button onclick="showView('create-playlist-page'); toggleSidebar(false);"
+                    class="btn-sidebar-action btn-playlist-purple">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 10px; vertical-align: middle;">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span data-translate="btnCreatePlaylist">Создать плейлист</span>
+            </button>
+
             <button onclick="showView('user-profile-page'); loadUserProfile(); toggleSidebar(false);"
                     class="btn-sidebar-action" data-translate="btnUserSettings">
                 Настройки профиля
             </button>
 
+
+
             <button id="toArtistConsole" class="btn-sidebar-action" style="display:none;" onclick="showView('artist-page'); toggleSidebar(false);" data-translate="btnToConsole">Для артистов</button>
-            <button id="toArtistProfile" class="btn-sidebar-action" style="display:none;" onclick="showView('artist-profile-page'); toggleSidebar(false);">Мой профиль артиста</button>
+            <button id="toArtistProfile" class="btn-sidebar-action" style="display:none;" onclick="showView('artist-profile-page'); toggleSidebar(false);" data-translate="btnArtistProfile">Мой профиль артиста</button>
 
             <button onclick="handleLogout()" class="btn-sidebar-action logout-btn" data-translate="btnLogout">Выйти из аккаунта</button>
         </div>
@@ -108,6 +120,8 @@
             <p class="status-msg" data-translate="statusLoading">Загрузка музыки...</p>
         </div>
     </section>
+
+
 
     <section id="artist-page" class="view" style="display:none;">
         <div class="upload-container" style="margin-top: 10px;">
@@ -216,6 +230,27 @@
         </div>
     </section>
 
+    <section id="create-playlist-page" class="view" style="margin-top: 20px; display: none;">
+        <h2 data-translate="createPlaylistTitle">Создать плейлист</h2>
+
+            <div class="file-input">
+                <input type="file" id="playlistCover" accept="image/*">
+            </div>
+
+
+        <input type="text" id="newPlaylistTitle"
+               data-placeholder="playlistTitlePlaceholder"
+               placeholder="Название плейлиста"
+               style="width: 100%; padding: 12px; margin-bottom: 20px; background: #2a2a2a; border: none; border-radius: 8px; color: white;">
+
+
+
+        <button onclick="createNewPlaylist()" class="btn-main" data-translate="btnSavePlaylist"
+                style="width: 100%; padding: 12px; background: #8a2be2; border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: bold;">
+            Создать
+        </button>
+    </section>
+
     <section id="user-profile-page" class="view" style="display:none; margin-top: 10px;">
         <div id="user-profile-display" style="position: relative; border-radius: 12px; overflow: hidden; background: #282828; padding: 30px; display: flex; align-items: center; gap: 25px; flex-wrap: wrap;">
             <div style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); background: #181818;">
@@ -229,6 +264,7 @@
                 <button  onclick="toggleUserEditor(true)" class="btn-outline" data-translate="userProfileTitle" style="padding: 8px 20px; border-radius: 20px; border: 1px solid #b3b3b3; background: transparent; color: white; cursor: pointer;">
                     Редактировать профиль
                 </button>
+
             </div>
         </div>
 
@@ -248,7 +284,34 @@
                 </div>
             </div>
         </div>
+
+        <div class="playlists-section">
+            <h3 data-translate="myPlaylists">Мои плейлисты</h3>
+            <div id="userPlaylistsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px;">
+            </div>
+        </div>
+
     </section>
+
+    <section id="playlist-details-page" class="view" style="display:none; padding: 20px;">
+        <div id="playlist-header" style="display: flex; align-items: end; gap: 20px; margin-bottom: 30px;">
+            <img id="playlist-header-cover" src="" style="width: 200px; height: 200px; border-radius: 8px; object-fit: cover;">
+            <div>
+                <h1 id="playlist-header-title">Название плейлиста</h1>
+                <button id="addTrackBtn" class="btn-main" data-translate="add_track">Добавить треки</button>
+            </div>
+        </div>
+
+        <div id="playlist-tracks-list" class="track-grid">
+        </div>
+    </section>
+
+    <section id="add-track-page" class="view" style="display:none; padding: 20px;">
+        <h2 data-translate="select_track">Выберите трек</h2>
+        <div id="all-tracks-grid" class="track-grid">
+        </div>
+    </section>
+
 </div>
 
 <footer id="player-bar" class="player-bar" style="display:none;">

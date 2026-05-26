@@ -42,6 +42,7 @@ public class AuthController {
                     if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
                         Map<String, Object> response = new HashMap<>();
                         response.put("username", user.getUsername());
+                        response.put("id", user.getId());
                         response.put("role", user.getRole().toString().toUpperCase());
                         return ResponseEntity.ok(response);
                     }
